@@ -680,67 +680,45 @@ function problem58() {
 	//initialize square spiral
 	//we don't actually need to store these numbers in a matrix
 		//Once we have the spiral visualized, we don't actually need a nested array to keep track of everything
-		//we just "hit each corner of the spiral", everytime we add a spiral theres 4 more diagonals that get added, we just need to check whether or not those numbers are prrime
-	// const spiralSquare = [[1]] 
+		//we just "hit each corner of the spiral", everytime we add a spiral theres 4 more diagonals that get added, we just need to check whether or not those numbers are prrime 
 	let primeCount = 0
 	let diagonalCount = 1
  
- 	const {primes, primeBools} = gf.getPrimeData(Math.pow(10,7) * Math.pow(2, 3))
-	//each time we add a "spiral"
-	let num = 2
+ 	// const {primes, primeBools} = gf.getPrimeData(Math.pow(10,7))
+	
+	let num = 1
+	let n = 1
 	do {
-		//Add a row to the top and bottom
-			//either of +2 length or of the same length and add to every row, we go with the 2nd option
-		let n = spiralSquare.length
-		
-		spiralSquare.unshift(new Array(n))
-		spiralSquare.push(new Array(n))
-		//add a column to the start and end of every row
-		for (const row of spiralSquare) {
-			row.unshift(null)
-			row.push(null)
-		}
-
-		n = spiralSquare.length
+		n += 2
 		let row = n - 2
 		let col = n - 2
 		//populate - Note: might want to expand primes if num will be greater than our last known prime
-		// if (Math.pow(n, 2) > primeBools.length - 1) {
-		// 	gf.expandPrimes(primes, primeBools, Math.pow(n, 2) - primeBools.length - 1)
-		// }
+		if (Math.pow(n, 2) > primeBools.length - 1) {
+			console.log('need to extend our list')
+			return;
+			// gf.expandPrimes(primes, primeBools, Math.pow(n, 2) - primeBools.length - 1)
+		}
 			//row and col indices are the indices of the last populated index
 			//move over one to the right and began counter-clockwise pattern
 			col++
+			num++ //increment num since we move over one
 			//if a diagonal index, check if prime 
 			//populate up
-			while(row > 0) {
-				spiralSquare[row][col] = num;
-				num++
-				row--
-			}
-				//row = 0, we're also at a diagonal index
+			num += row //we move up the row until we hit the corner, i.e from current row up to top
+			//row = 0, we're also at a diagonal index
 			if (primeBools[num]) {
 				primeCount++
 			}
 			diagonalCount++
 			//left
-			while(col > 0) {
-				spiralSquare[row][col] = num
-				num++
-				col--
-			}
-				//row = 0, col = 0, same logic
+			num += col //move from top right to top left, should always be col length
 			if (primeBools[num]) {
 				primeCount++
 			}
 			diagonalCount++
 
 			//down
-			while(row < n - 1) {
-				spiralSquare[row][col] = num
-				num++
-				row++
-			}
+			num += n - 1 // top left to bottom left
 
 			if (primeBools[num]) {
 				primeCount++
@@ -748,23 +726,18 @@ function problem58() {
 			diagonalCount++
 
 			//right - done
-			
-			while (col < n - 1) {
-				
-				spiralSquare[row][col] = num
-				num++
-				col++
-			}
+			num += n - 1 //bottom left to bottom right
 			if (primeBools[num]) {
 				primeCount++
 			}
 			diagonalCount++
-			spiralSquare[row][col] = num
-			num++
+			console.log(num, primeCount, diagonalCount)
+			//Could just do a diagonalCount += 4 at the end here, but eh
 	} while (primeCount / diagonalCount > (1 / 10))
+	// } while (num < 49)			
 
 	// console.log(spiralSquare)
-	return spiralSquare.length
+	return n
 }
 
 console.log(`The spiral square where diagonal values that are prime make up less than 10% of diagional values has a length of ${problem58()}`)
