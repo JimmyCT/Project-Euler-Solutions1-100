@@ -686,6 +686,12 @@ function problem58() {
  
  	// const {primes, primeBools} = gf.getPrimeData(Math.pow(10,7))
 	
+	function isPrime(num) {
+		for (let i = 2; i <= Math.sqrt(num); i++) {
+			if (num % i === 0) return false;
+		}
+		return true;
+	}
 	let num = 1
 	let n = 1
 	do {
@@ -693,11 +699,11 @@ function problem58() {
 		let row = n - 2
 		let col = n - 2
 		//populate - Note: might want to expand primes if num will be greater than our last known prime
-		if (Math.pow(n, 2) > primeBools.length - 1) {
-			console.log('need to extend our list')
-			return;
-			// gf.expandPrimes(primes, primeBools, Math.pow(n, 2) - primeBools.length - 1)
-		}
+		// if (Math.pow(n, 2) > primeBools.length - 1) {
+		// 	console.log('need to extend our list')
+		// 	return;
+		// 	// gf.expandPrimes(primes, primeBools, Math.pow(n, 2) - primeBools.length - 1)
+		// }
 			//row and col indices are the indices of the last populated index
 			//move over one to the right and began counter-clockwise pattern
 			col++
@@ -706,13 +712,13 @@ function problem58() {
 			//populate up
 			num += row //we move up the row until we hit the corner, i.e from current row up to top
 			//row = 0, we're also at a diagonal index
-			if (primeBools[num]) {
+			if (isPrime(num)) {
 				primeCount++
 			}
 			diagonalCount++
 			//left
 			num += col //move from top right to top left, should always be col length
-			if (primeBools[num]) {
+			if (isPrime(num)) {
 				primeCount++
 			}
 			diagonalCount++
@@ -720,14 +726,14 @@ function problem58() {
 			//down
 			num += n - 1 // top left to bottom left
 
-			if (primeBools[num]) {
+			if (isPrime(num)) {
 				primeCount++
 			}
 			diagonalCount++
 
 			//right - done
 			num += n - 1 //bottom left to bottom right
-			if (primeBools[num]) {
+			if (isPrime(num)) {
 				primeCount++
 			}
 			diagonalCount++
@@ -740,6 +746,88 @@ function problem58() {
 	return n
 }
 
-console.log(`The spiral square where diagonal values that are prime make up less than 10% of diagional values has a length of ${problem58()}`)
+// console.log(`The spiral square where diagonal values that are prime make up less than 10% of diagional values has a length of ${problem58()}`)
+
+//Problem 59 XOR decryption
+
+// For unbreakable encryption, the key is the same length as the plain text message,
+	//To get the key, we use the length of the plain text message ?
+//Given a file with encrypted ascii codes
+//decrypt the codes into a message
+function problem59(p59CipherFile) {
+	gf.fetchData(p59CipherFile).then((response) => {
+		const codes = response.split(',')
+		//If i'm understanding this correctly, we have a list of encrypted ascii codes
+		//we use the encryption key that consists of 3 lower case characters as specified by problem defintion, (what are these 3 lower case characters??)
+			//Ah, we don't know what the encryption key is, just that it is 3 lower case characters, - need to figure out what the key is
+
+			//Figure out the key
+			//Option 1) use the first 3 codes to figure out possible lower chars for the encryption key
+				//then using the possibilities for index 0,1,2 of the encryption key, run against the rest of the message figure out possibilites that keep up
+			//Option 2) Assume at 26 lower case characters are possible, as we go through the message, we remove possibilites that are "bad"
+				//We go with option 2
+			const keyPossibilities = [new Set(), new Set(), new Set()]
+
+			for (const possibilities of keyPossibilities) {
+				for (let asciiCode = 97; asciiCode < 123; asciiCode++) {
+					//adding ascii values 97-122 'a' - 'z'
+					possibilities.add(asciiCode)
+				}
+			}
+			let i = 0
+			while (i < codes.length) {
+				const encryptedCode = codes[i]
+				//Using the possible characters, run it against the rest of the message until a message is shown
+				if (keyPossibilities[i % 3].size === 0) {
+					console.error(`Problem 59, we've checked all possible lower case characters for the 3-lower chracter encryption key at index ${i % 3}, please rework how we solve the encryption key`)
+					return
+				}
+				for (const lowerCharCode of keyPossibilities[i % 3]) {
+					const decryptedCode = encryptedCode ^ lowerCharCode
+					// if (32 <= decryptedCode && decryptedCode <= 126) {
+					// 	//its good!
+					// }
+					//Remove possibilities that result in a "bad" character/message
+					//Assumption: "bad" codes are the ones outside the range [32, 126] - these codes are the printable codes
+					if (decryptedCode < 32 || decryptedCode > 126) {
+						console.log(`Encrypted code ${encryptedCode} with lowerChar ${String.fromCharCode(lowerCharCode)} results in decryptedCode ${decryptedCode} which is outside of our ascii range of 32-126, removing ${lowerCharCode} from ${i % 3}'s possibilities`)
+						keyPossibilities[i % 3].delete(lowerCharCode)
+					}
+				}
+				i++
+			}
+			
+			for (const keyIndex0 of keyPossibilities[0]) {
+				for (const keyIndex1 of keyPossibilities[1]) {
+					for (const keyIndex2 of keyPossibilities[2]) {
+						const keyCodes = [keyIndex0, keyIndex1, keyIndex2]
+						const stringChars = []
+						let i = 0
+						while (i < codes.length) {
+							const char = String.fromCharCode(codes[i] ^ keyCodes[i % 3])
+							stringChars.push(char)
+							i++
+						}
+						const charKey0 = String.fromCharCode(keyIndex0)
+						const charKey1 = String.fromCharCode(keyIndex1)
+						const charKey2 = String.fromCharCode(keyIndex2)
+						console.log(`Encryption key ${charKey0}${charKey1}${charKey2} results in the following message:
+							${stringChars.join('')}`)
+					}
+				}
+			}
+
+			//3-lowercase character encryption, multiple possibilties for each index of the key
+				//Through brute force, key 'exp' gives a 
+
+			//decrypt each ascii code
+			//convert ascii code to character
+				//for problem solution, add ascii code to a sum
+			//get the message
+				//message should make sense in clear english otherwise its probably wrong.
+	})
+}
+
+problem59(__dirname + '/problem59.txt');
 
 
