@@ -755,6 +755,7 @@ function problem58() {
 //Given a file with encrypted ascii codes
 //decrypt the codes into a message
 function problem59(p59CipherFile) {
+
 	gf.fetchData(p59CipherFile).then((response) => {
 		const codes = response.split(',')
 		//If i'm understanding this correctly, we have a list of encrypted ascii codes
@@ -790,44 +791,101 @@ function problem59(p59CipherFile) {
 					//Remove possibilities that result in a "bad" character/message
 					//Assumption: "bad" codes are the ones outside the range [32, 126] - these codes are the printable codes
 					if (decryptedCode < 32 || decryptedCode > 126) {
-						console.log(`Encrypted code ${encryptedCode} with lowerChar ${String.fromCharCode(lowerCharCode)} results in decryptedCode ${decryptedCode} which is outside of our ascii range of 32-126, removing ${lowerCharCode} from ${i % 3}'s possibilities`)
+						// console.log(`Encrypted code ${encryptedCode} with lowerChar ${String.fromCharCode(lowerCharCode)} results in decryptedCode ${decryptedCode} which is outside of our ascii range of 32-126, removing ${lowerCharCode} from ${i % 3}'s possibilities`)
 						keyPossibilities[i % 3].delete(lowerCharCode)
 					}
 				}
 				i++
 			}
 			
-			for (const keyIndex0 of keyPossibilities[0]) {
-				for (const keyIndex1 of keyPossibilities[1]) {
-					for (const keyIndex2 of keyPossibilities[2]) {
-						const keyCodes = [keyIndex0, keyIndex1, keyIndex2]
-						const stringChars = []
-						let i = 0
-						while (i < codes.length) {
-							const char = String.fromCharCode(codes[i] ^ keyCodes[i % 3])
-							stringChars.push(char)
-							i++
-						}
-						const charKey0 = String.fromCharCode(keyIndex0)
-						const charKey1 = String.fromCharCode(keyIndex1)
-						const charKey2 = String.fromCharCode(keyIndex2)
-						console.log(`Encryption key ${charKey0}${charKey1}${charKey2} results in the following message:
-							${stringChars.join('')}`)
-					}
-				}
-			}
+			//Next 20-ish lines are used to figure out an encryption key that returns a proper message
+				//its 'exp'
+// 			for (const keyIndex0 of keyPossibilities[0]) {
+// 				for (const keyIndex1 of keyPossibilities[1]) {
+// 					for (const keyIndex2 of keyPossibilities[2]) {
+// 						const keyCodes = [keyIndex0, keyIndex1, keyIndex2]
+// 						const stringChars = []
+// 						let i = 0
+// 						while (i < codes.length) {
+// 							const char = String.fromCharCode(codes[i] ^ keyCodes[i % 3])
+// 							stringChars.push(char)
+// 							i++
+// 						}
+// 						const charKey0 = String.fromCharCode(keyIndex0)
+// 						const charKey1 = String.fromCharCode(keyIndex1)
+// 						const charKey2 = String.fromCharCode(keyIndex2)
+// 						// console.log(`Encryption key ${charKey0}${charKey1}${charKey2} results in the following message:
+// // ${stringChars.join('')}`)
+// 						// console.log('Encryption key',charKey0 + charKey1 + charKey2, 'results in the following message: \n' + stringChars.join(''))
+// 					}
+// 				}
+// 			}
 
 			//3-lowercase character encryption, multiple possibilties for each index of the key
 				//Through brute force, key 'exp' gives a 
 
-			//decrypt each ascii code
-			//convert ascii code to character
-				//for problem solution, add ascii code to a sum
-			//get the message
-				//message should make sense in clear english otherwise its probably wrong.
+			const key = 'exp'
+			const keyCodes = key.split('').map((char) => char.charCodeAt('0'))
+			
+			const messageArr = []
+			let messageCodeSum = 0
+			i = 0
+			while (i < codes.length) {
+				const encryptedCode = codes[i]
+				const decryptedCode = encryptedCode ^ keyCodes[i % 3];
+
+				messageArr.push(String.fromCharCode(decryptedCode))
+				messageCodeSum += decryptedCode
+				i++
+			}
+
+			console.log(messageArr.join(''))
+			console.log(`The sum of the ascii codes in the decrypted message is ${messageCodeSum}`)
 	})
 }
 
-problem59(__dirname + '/problem59.txt');
+// problem59(__dirname + '/problem59.txt');
 
 
+//Problem 60 Prime pair sets
+
+
+//Find 5 primes that fit the quota, get the sum
+//check for any other sets of 5 primes that match the condition
+//if sum of potential primes is greater than our min, we need not check futhur (using a list of sorted primes)
+	//we know we're done because we're working with primes sorted least to greatest
+		//so either when we find the solution, its already the min possible
+		//or we exhausts our options such that when we know a combination of 5 primes works, any future combinations that will sum up to something greater need not be checked and will always be greater, thus we've exhuasted all our options
+function problem60() {
+	let res = null
+
+	const {primes, primeBools} = gf.getPrimeData(Math.pow(10, 7))
+
+
+	console.log(primes[primes.length - 1])
+	let primesSubset = [] // 
+	//find 5 numbers that fit the description we're looking for
+	let basePrimeIndex = 0 // the index of our leftmost prime number 
+
+	/********|| our subset sum is not guranteed to be greater than the current res*/
+	while (res === null ) {
+		//populate our subset
+		//start with the smallest prime, 2
+			//find a pair for 2
+				//find a matching prime for whatever is in our subset until we have 5
+		//Sum it up and treat it as a min
+
+		//pop the last prime
+			//any additional prime will be greater than our current sub min, so we pop again
+				//we should be at 3 primes, 4th prime should be the "next one" that fits what we're looking for for the 4th option,
+				 //if its still less than our current min (or we can look at sub mins to optimize) then we keep populating
+		//Overall ^ is a recursive process until we have an empty subset, we increment our leftmost prime until its guranteed to be greater than our min (possible optimizations here again by running against sub-mins)	
+
+
+	}
+
+	//test any other possible combinations of prime, once these possibilities are guranteed to be a sum greater than our min, we've exhausted all our options
+
+}
+
+problem60()
