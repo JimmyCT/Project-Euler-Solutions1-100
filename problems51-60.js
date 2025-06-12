@@ -856,36 +856,129 @@ function problem59(p59CipherFile) {
 	//we know we're done because we're working with primes sorted least to greatest
 		//so either when we find the solution, its already the min possible
 		//or we exhausts our options such that when we know a combination of 5 primes works, any future combinations that will sum up to something greater need not be checked and will always be greater, thus we've exhuasted all our options
-function problem60() {
+function problem60(target) {
 	let res = null
 
 	const {primes, primeBools} = gf.getPrimeData(Math.pow(10, 7))
+	let primesPointer = 1
 
-
-	console.log(primes[primes.length - 1])
-	let primesSubset = [] // 
 	//find 5 numbers that fit the description we're looking for
-	let basePrimeIndex = 0 // the index of our leftmost prime number 
+	// console.log(primes[primes.length - 1])
+	let candidates = [] //  
+
+	function isPrime(num) {
+		for (let i = 2; i < Math.sqrt(num); i++) {
+			if (num % i === 0) {
+				return false
+			}
+		}
+
+		return true
+	}
+
+	function isPrimePair(n1, n2) {
+		const s1 = `${n1}`
+		const s2 = `${n2}`
+
+		return (primeBools[`${s1 + s2}`] && primeBools[`${s2 + s1}`])	
+	}
 
 	/********|| our subset sum is not guranteed to be greater than the current res*/
-	while (res === null ) {
+
+	// let currentPrime = primes[primesPointer]
+	let currentPrime = undefined
+	while (res === null && currentPrime !== undefined) {
 		//populate our subset
 		//start with the smallest prime, 2
-			//find a pair for 2
-				//find a matching prime for whatever is in our subset until we have 5
+			//NO DON'T START WITH 2, concatenating 2 on the right side will always be even you twat
+				//find a matching prime for whatever is in our subset until we have a set of size 5
+		let candidatesPointer = 0
+		while (candidatesPointer < candidates.length) {
+			if (!isPrimePair(candidates[candidatesPointer], primes[primesPointer])) {
+				break;
+			}
+			candidatesPointer++
+		}
+		if (candidatesPointer !== candidates.length) {
+			primesPointer++
+			currentPrime = primes[primesPointer]
+			continue;
+		}
+		
+		candidates.push(primes[primesPointer])
+		console.log(candidates)
 		//Sum it up and treat it as a min
+		if (candidates.length === target) {
+			res = candidates.reduce((acc, curr) => acc + curr, 0)
+		}
+		primesPointer++
+		currentPrime = primes[primesPointer]
+		// console.log(currentPrime)
+	}
+	// console.log(res, candidates)
+ 
+	let pow10 = 0
+	let n = 1
+	if (res === null) {
+		console.log('try hybrid algo??')
+		// currentPrime = primes[primes.length - 1] + 2
+		currentPrime = 3;
 
+
+		while (candidates.length < target) {
+			if (isPrime(currentPrime)) {
+				if (currentPrime > Math.pow(10, pow10)) {
+					console.log(`Checking primes greater than 10 to the ${pow10}, currentPrime:${currentPrime}`)
+					// console.log(`Checking primes greater than ${n * Math.pow(10, pow10)}, currentPrime:${currentPrime}`)
+					// n++
+					pow10++
+					n = 2
+				}
+
+				if (currentPrime > n * Math.pow(10, pow10 - 1)) {
+					console.log(`Checking primes greater than ${n * Math.pow(10, pow10 - 1)}, currentPrime:${currentPrime}`) 
+					n++
+				}
+
+				if (pow10 === 9) {
+					console.log('early exit, try a more efficient solution')
+				}
+				let candidatesPointer = 0
+				while (candidatesPointer < candidates.length) {
+					if (!isPrimePair(candidates[candidatesPointer], currentPrime)) {
+						break;
+					}
+					candidatesPointer++
+				}
+
+				if (candidatesPointer === candidates.length) {
+					candidates.push(currentPrime)
+					console.log(`New addition, current list: ${candidates}`)
+				}
+				
+				if (candidates.length === target) {
+					res = candidates.reduce((acc, sum) => acc + sum, 0);
+				}
+			}
+
+			currentPrime += 2 //increment by 2 to stay on odd numbers, 
+		}
+
+		console.log(`derp, candidates: ${candidates}`)
+	}
+	// we have list/set containing 5 primes that produce another prime when concatenating any 2 primes in any order
+
+	//test any other possible combinations of prime, once these possibilities are guranteed to be a sum greater than our min, we've exhausted all our options
 		//pop the last prime
 			//any additional prime will be greater than our current sub min, so we pop again
+
+
 				//we should be at 3 primes, 4th prime should be the "next one" that fits what we're looking for for the 4th option,
 				 //if its still less than our current min (or we can look at sub mins to optimize) then we keep populating
 		//Overall ^ is a recursive process until we have an empty subset, we increment our leftmost prime until its guranteed to be greater than our min (possible optimizations here again by running against sub-mins)	
-
-
-	}
-
-	//test any other possible combinations of prime, once these possibilities are guranteed to be a sum greater than our min, we've exhausted all our options
-
 }
 
-problem60()
+//Note to self, we start with a solution solving for min of 4, once it "works", we adjust to 5
+problem60(5)
+
+// let test = [3, 7, 109, 673] 
