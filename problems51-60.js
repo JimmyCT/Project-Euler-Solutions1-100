@@ -1,28 +1,61 @@
 const gf = require(__dirname + '/generalFunctions.js')
 //problem 51 Prime digit replacements
 
-//Power set
-let testArr = [1,2,3,4,5]
-function powerSet(arr) {
-	const res = []
-	//power set = sum from r = 0 to r = n for n choose r 
-	function combinationHelper(subArr, index, r) {
-		if (subArr.length === r) {
-			res.push(subArr.slice())
-			return;
-		}
-		for (let i = index; i < arr.length; i++) {
-			subArr.push(arr[i])
-			combinationHelper(subArr, i + 1, r)
-			subArr.pop()
-		}
-	}
+// //Power set
+// let testArr = [1,2,3,4,5]
+// function powerSet(arr) {
+// 	const res = []
+// 	//power set = sum from r = 0 to r = n for n choose r 
+// 	function combinationHelper(subArr, index, r) {
+// 		if (subArr.length === r) {
+// 			res.push(subArr.slice())
+// 			return;
+// 		}
+// 		for (let i = index; i < arr.length; i++) {
+// 			subArr.push(arr[i])
+// 			combinationHelper(subArr, i + 1, r)
+// 			subArr.pop()
+// 		}
+// 	}
 
-	for (let r = 0; r <= arr.length; r++) {
-		combinationHelper([], 0, r)
+// 	for (let r = 0; r <= arr.length; r++) {
+// 		combinationHelper([], 0, r)
+// 	}
+// 	return res
+// }
+
+//Power set function
+// const testList = [1,2,3,4]
+function powerSet(list) {
+	const res = new Set()
+	// res.add('[]') //empty set
+
+	function helper(i, sublist) {
+		if (i === list.length) return;
+		sublist.push(list[i])
+		// res.push(sublist.slice())
+		// res.add(`[${sublist}]`)
+		res.add(`${sublist}`)
+		helper(i + 1, sublist)
+		sublist.pop()
+		helper(i + 1, sublist)
 	}
+	helper(0, [])
 	return res
 }
+
+
+// const testPowerSet = powerSet(testList)
+// console.log(testPowerSet)
+// console.log(testPowerSet.size)
+//remove empty list and list itself
+// testPowerSet.delete('[]')
+// testPowerSet.delete(`[${testList}]`)
+// console.log(testPowerSet)
+// console.log(testPowerSet.size)
+
+
+// 123 12 13 23 1 2 3 null, let n be size of our set S, let m be the size of the power set of set S, m = 2 ^ n 
 
 //Now for our problem, we're essentially doing a power set minus the empty set portion and the portion that contains (n choose r) values where r = n = the number of values in the set
 function modifiedPowerSet(arr) {
@@ -48,23 +81,126 @@ function modifiedPowerSet(arr) {
 
 //Modified power set works great as intended,
 
-//Use the modified power set for all numbers with the same amount of digits n
-	//For each group of n digits, use memoization, so while looking at 13, *3, eventually 23, is memoized for all *3, likewise 1* will have 17 memoized
-		//1113 11*3 1133 
-				//1*13 1133
+
+//Option1: Power set style algorithm to determine which digits to be replaced
+	//For every prime number, let n be the number of digits of the prime number
+	//let m be the number of prime numbers length n,
+		//we'd be doing a 2^n time complexity on m prime numbers of length n, until we find a solution
+		//the 2^n process chooses which digits to omit, we replace those digits with 1-9 (or 0-9), which we consider constant time work
+			//but we still have to "zip the number" back together, i.e. the digit replacement and check process still takes n work
+		
+		//We're looking at m * n * 2^n 
+
+//Option2: we go through all primes of n digits, 1,2,3,4...,n
+	//for every prime number of length n, we do a O(n) process to store digit counts 
+		//we use a nested lists style storage system, O(9^n) space
+		//let m = num of prime numbers of length n
+		//create storage space of space (10^n), its 9 * 10^(n - 1) to be precise
+		//time = O(mn)
+
+		//we store the count of a numbers 1-9 at for our leftmost digit in our top layered list,
+			//with each count we include a sublist containing the count for numbers 0-9 in the next digit, with their own sublist
+
+	//then similiar to option1, we do a power set style algo to decide which digit to "omit",e
+		//for digits that are omitted, we use the count for every number in that digit index
+		//for digits that are not omitted, we use the count for each number in that index individually
+
+	// O(2^n) to determine which digits to omit
+		// O(9 ^ n) process for value in our subset
+		// => overall O((2^n)(9^n)) = O(18^n) time
+	//same storage being used
+		
+//O(mn * 2^n) time, O(1) space relative to n, O(k) space where k = size of primeBools 
+//O(18^n)time, O(9 ^ n) space for n > k and O(k) for n <= k, where k = size of primeBools
 
 
 
-//OKAY NEW PLAN
-//think about primes grouped by their number of digits
-
-	//for all 2 digit primes, record count of 0th index digit, and count of 1st index 
-		//for all 2 digit primes, the 1st index saw the number 3 6 times
-// function problem51() {
-
-// }
+//Option 1 solution
+//This solution takes a few liberties geared towards solving the specific problem instead of making a general solution 
+function problem51(target, limit) {
+	const {primes, primeBools} = gf.getPrimeData(Math.pow(10, limit))
 
 
+	// let i = 0;
+	// let prime = primes[i]
+
+	// while (prime < 10) {
+	// 	i++
+	// 	prime = primes[i]
+	// }
+	//we know 56003 is the smallest prime in which we can find a 7 prime family
+	//to find a prime family > 7, the number would absolutely have to be > 56003
+	
+	let i = primes.indexOf(56003)
+	let prime = primes[i]
+
+	const tmp = []
+	let pvrs  //set containing lists telling which place values to be manipulate
+
+	let n = 0
+	while (n < `${prime}`.length) {
+		tmp.push(n)
+		n++
+	}
+
+	while (n <= limit) {
+		pvrs = powerSet(tmp)
+		//remove empty set and set itself
+		// pvrs.delete('[]')
+		pvrs.delete(`${tmp}`)
+
+		while (prime < Math.pow(10, n)) {
+			// if (prime === 56003) {
+			// 	console.log('am i crazy?!')
+			// 	console.log(pvrs)
+			// 	return;
+			// }
+			const digits = `${prime}`.split('')
+
+			//we want to ignore cases where we put 0 in the 0th index (think 0 index digits) 
+				//any pvrs involving the 0th index, we look at digits 0-9
+
+			for (let pvs of pvrs) {
+				pvs = pvs.split(',')
+				
+				const copy = digits.slice()
+				let primeFamily = []
+				for (let replacementNum = 0; replacementNum <= 9; replacementNum++) {
+					if (pvs[0] === '0' && replacementNum === 0) continue;
+					for (const pv of pvs) {
+						copy[pv] = replacementNum
+					}
+
+					const newNum = copy.join('')
+					if (primeBools[newNum]) {
+						primeFamily.push(newNum)
+
+						// console.log(`${newNum} is a prime num formed by manipulating digits ${pvs} in ${digits.join()} to ${replacementNum}`)
+						// console.log(`added to our prime family, now containing: ${primeFamily}`)
+						if (primeFamily.length === target) {
+							// console.log(primeFamily)
+							console.log(`[${primeFamily}] are the first prime values where we see ${target} primes, by replacing the place values [${pvs}] specifically`)
+							//since we test replacement numbers in order from least to greatest, the prime family is naturally ordered LTG as well
+							return primeFamily[0];
+						}
+					}
+				}
+			}
+
+
+			i++
+			prime = primes[i]
+		}
+		console.log(`${prime ? `${prime} is greater than ${Math.pow(10, n)}, incrementing ${n} to ${n + 1}` : `Exceeded our limit, consider expanding the limit`}`)
+		tmp.push(n)
+		n++
+	}
+
+}
+const t = [1,2,3,4]
+
+// problem51(7, 6) //expect 56033
+// problem51(8, 7) //P51 problem
 //problem 52 Permuted Multiples
 
 
@@ -856,17 +992,178 @@ function problem59(p59CipherFile) {
 	//we know we're done because we're working with primes sorted least to greatest
 		//so either when we find the solution, its already the min possible
 		//or we exhausts our options such that when we know a combination of 5 primes works, any future combinations that will sum up to something greater need not be checked and will always be greater, thus we've exhuasted all our options
+// function problem60(target) {
+// 	let res = null
+
+// 	const {primes, primeBools} = gf.getPrimeData(Math.pow(10, 7))
+// 	let primesPointer = 1
+
+// 	//find 5 numbers that fit the description we're looking for
+// 	// console.log(primes[primes.length - 1])
+// 	let candidates = [] //  
+
+// 	function isPrime(num) {
+// 		for (let i = 2; i < Math.sqrt(num); i++) {
+// 			if (num % i === 0) {
+// 				return false
+// 			}
+// 		}
+
+// 		return true
+// 	}
+
+// 	function isPrimePair(n1, n2) {
+// 		const s1 = `${n1}`
+// 		const s2 = `${n2}`
+
+// 		return (primeBools[`${s1 + s2}`] && primeBools[`${s2 + s1}`])	
+// 	}
+
+// 	/********|| our subset sum is not guranteed to be greater than the current res*/
+
+// 	// let currentPrime = primes[primesPointer]
+// 	let currentPrime = undefined
+// 	while (res === null && currentPrime !== undefined) {
+// 		//populate our subset
+// 		//start with the smallest prime, 2
+// 			//NO DON'T START WITH 2, concatenating 2 on the right side will always be even you twat
+// 				//find a matching prime for whatever is in our subset until we have a set of size 5
+// 		let candidatesPointer = 0
+// 		while (candidatesPointer < candidates.length) {
+// 			if (!isPrimePair(candidates[candidatesPointer], primes[primesPointer])) {
+// 				break;
+// 			}
+// 			candidatesPointer++
+// 		}
+// 		if (candidatesPointer !== candidates.length) {
+// 			primesPointer++
+// 			currentPrime = primes[primesPointer]
+// 			continue;
+// 		}
+		
+// 		candidates.push(primes[primesPointer])
+// 		console.log(candidates)
+// 		//Sum it up and treat it as a min
+// 		if (candidates.length === target) {
+// 			res = candidates.reduce((acc, curr) => acc + curr, 0)
+// 		}
+// 		primesPointer++
+// 		currentPrime = primes[primesPointer]
+// 		// console.log(currentPrime)
+// 	}
+// 	// console.log(res, candidates)
+ 
+// 	let pow10 = 0
+// 	let n = 1
+// 	if (res === null) {
+// 		console.log('try hybrid algo??')
+// 		// currentPrime = primes[primes.length - 1] + 2
+// 		currentPrime = 3;
+
+
+// 		while (candidates.length < target) {
+// 			if (isPrime(currentPrime)) {
+// 				if (currentPrime > Math.pow(10, pow10)) {
+// 					console.log(`Checking primes greater than 10 to the ${pow10}, currentPrime:${currentPrime}`)
+// 					// console.log(`Checking primes greater than ${n * Math.pow(10, pow10)}, currentPrime:${currentPrime}`)
+// 					// n++
+// 					pow10++
+// 					n = 2
+// 				}
+
+// 				if (currentPrime > n * Math.pow(10, pow10 - 1)) {
+// 					console.log(`Checking primes greater than ${n * Math.pow(10, pow10 - 1)}, currentPrime:${currentPrime}`) 
+// 					n++
+// 				}
+
+// 				if (pow10 === 9) {
+// 					console.log('early exit, try a more efficient solution')
+// 				}
+// 				let candidatesPointer = 0
+// 				while (candidatesPointer < candidates.length) {
+// 					if (!isPrimePair(candidates[candidatesPointer], currentPrime)) {
+// 						break;
+// 					}
+// 					candidatesPointer++
+// 				}
+
+// 				if (candidatesPointer === candidates.length) {
+// 					candidates.push(currentPrime)
+// 					console.log(`New addition, current list: ${candidates}`)
+// 				}
+				
+// 				if (candidates.length === target) {
+// 					res = candidates.reduce((acc, num) => acc + num, 0);
+// 				}
+// 			}
+
+// 			currentPrime += 2 //increment by 2 to stay on odd numbers, 
+// 		}
+
+// 		console.log(`derp, candidates: ${candidates}`)
+// 	}
+// 	// we have list/set containing 5 primes that produce another prime when concatenating any 2 primes in any order
+
+// 	//test any other possible combinations of prime, once these possibilities are guranteed to be a sum greater than our min, we've exhausted all our options
+// 		//pop the last prime
+// 			//any additional prime will be greater than our current sub min, so we pop again
+
+
+// 				//we should be at 3 primes, 4th prime should be the "next one" that fits what we're looking for for the 4th option,
+// 				 //if its still less than our current min (or we can look at sub mins to optimize) then we keep populating
+// 		//Overall ^ is a recursive process until we have an empty subset, we increment our leftmost prime until its guranteed to be greater than our min (possible optimizations here again by running against sub-mins)	
+// }
+
+
+
+
+//Different route at solving p60
+
+//Work with primes in order from smallest to greatest
+	//start at 3, 2 makes even numbers
+//Have a list of potential subsets
+
+//Current prime number checks against all potential subsets, if it can be added, add it (use helper func)
+	//if it gets added, does the subset contain our target amount,
+		//yes - record the sum
+			//need to verify against other potential solutions until we're guranteed to exhaust our options (any potential sum > current solution)
+		//no - carrry on
+
+	//Once all subsets are tested, we add the prime by itself as a candidate 
+
 function problem60(target) {
 	let res = null
 
-	const {primes, primeBools} = gf.getPrimeData(Math.pow(10, 7))
-	let primesPointer = 1
+	const primePow = 7
+	const {primes, primeBools} = gf.getPrimeData(Math.pow(10, primePow));
 
-	//find 5 numbers that fit the description we're looking for
-	// console.log(primes[primes.length - 1])
-	let candidates = [] //  
+	function isPrimePair(n1, n2) {
+		const s1 = `${n1}${n2}`
+		const s2 = `${n2}${n1}`
+
+		// primePow = 6, => 1,000,000 s1.length >= primePow + 1 => s1 > Math.pow(10, primePow)
+		if (s1.length >= primePow + 1) {
+			if (!isPrime(s1)) return false;
+		} else {
+			if (!primeBools[s1]) return false
+		}
+
+		if (s2.length >= primePow + 1) {
+			if (!isPrime(s2)) return false
+		} else {
+			if (!primeBools[s2]) return false
+		}
+
+		return true
+		// return (primeBools[`${s1 + s2}`] && primeBools[`${s2 + s1}`])	
+	}
 
 	function isPrime(num) {
+		num =  Number(num)
+		if (Number.isNaN(num)) {
+			throw new Error(`Please input a number for helper function: isPrime`)
+		}
+
 		for (let i = 2; i < Math.sqrt(num); i++) {
 			if (num % i === 0) {
 				return false
@@ -876,109 +1173,138 @@ function problem60(target) {
 		return true
 	}
 
-	function isPrimePair(n1, n2) {
-		const s1 = `${n1}`
-		const s2 = `${n2}`
+	let primeIndex = 1
+	let currentPrime = primes[primeIndex]
+	let subsets = []
 
-		return (primeBools[`${s1 + s2}`] && primeBools[`${s2 + s1}`])	
-	}
 
-	/********|| our subset sum is not guranteed to be greater than the current res*/
+	let testPow = 0
+	while (res === null) {
+		if (currentPrime > Math.pow(10, testPow)) {
+			console.log(`Testing primes greater than ${Math.pow(10, testPow)}, currentPrime: ${currentPrime}`)
+			console.log(`Size of potential subsets being tested: ${subsets.length}`)
+			testPow++
+		}
+		let subsetsIndex = 0
+		while (subsetsIndex < subsets.length) {
+			const subset = subsets[subsetsIndex]
 
-	// let currentPrime = primes[primesPointer]
-	let currentPrime = undefined
-	while (res === null && currentPrime !== undefined) {
-		//populate our subset
-		//start with the smallest prime, 2
-			//NO DON'T START WITH 2, concatenating 2 on the right side will always be even you twat
-				//find a matching prime for whatever is in our subset until we have a set of size 5
-		let candidatesPointer = 0
-		while (candidatesPointer < candidates.length) {
-			if (!isPrimePair(candidates[candidatesPointer], primes[primesPointer])) {
-				break;
+			let subsetPrimeIndex = 0
+			while (subsetPrimeIndex < subset.length) {
+				const subsetPrime =subset[subsetPrimeIndex]
+				if (!isPrimePair(currentPrime, subsetPrime)) {
+					break;
+				}
+
+				subsetPrimeIndex++
 			}
-			candidatesPointer++
+			if (subsetPrimeIndex === subset.length) {
+				//Current prime works with all primes in the current subset, add it as a new subset
+				const newSubset = subset.slice()
+				newSubset.push(currentPrime)
+
+				if (newSubset.length === target) {
+					console.log('hi',  subset)
+					console.log(`${currentPrime} works with all the primes in ${subset}`)
+				}
+				subsets.push(newSubset)
+				if (newSubset.length === target) {
+					// console.log('WE GOT A RES', newSubset.reduce((acc, sum) => acc + sum, 0))
+					const sum = newSubset.reduce((acc, num) => acc + num, 0)
+
+					res = res === null ? sum : Math.min(res, sum)		 
+				}
+			}
+
+			subsetsIndex++
 		}
-		if (candidatesPointer !== candidates.length) {
-			primesPointer++
-			currentPrime = primes[primesPointer]
-			continue;
-		}
-		
-		candidates.push(primes[primesPointer])
-		console.log(candidates)
-		//Sum it up and treat it as a min
-		if (candidates.length === target) {
-			res = candidates.reduce((acc, curr) => acc + curr, 0)
-		}
-		primesPointer++
-		currentPrime = primes[primesPointer]
-		// console.log(currentPrime)
+
+		subsets.push([currentPrime])
+		primeIndex++
+		currentPrime = primes[primeIndex]
 	}
-	// console.log(res, candidates)
- 
-	let pow10 = 0
-	let n = 1
-	if (res === null) {
-		console.log('try hybrid algo??')
-		// currentPrime = primes[primes.length - 1] + 2
-		currentPrime = 3;
 
 
-		while (candidates.length < target) {
-			if (isPrime(currentPrime)) {
-				if (currentPrime > Math.pow(10, pow10)) {
-					console.log(`Checking primes greater than 10 to the ${pow10}, currentPrime:${currentPrime}`)
-					// console.log(`Checking primes greater than ${n * Math.pow(10, pow10)}, currentPrime:${currentPrime}`)
-					// n++
-					pow10++
-					n = 2
+	console.log('hi we made it this far, so we should have some sort of solution')
+	console.log(res)
+
+	//OKAY
+
+	//current prime should be the next option
+
+	//we can make our life a million times easier if we removed "potentials with sum greater than our res"
+
+	// function cleanPotentials(potentials, res) {
+	// 	return potentials.filter((potential) => potential.reduce((acc, num) => acc + num, 0) < res)
+	// }
+
+	//Make life easier, instead of in place array manipulation
+	//We take in a list of potentials and return a copy where sums > res are filtered out
+	subsets = subsets.filter((subset) => subset.reduce((acc, num) => acc + num, 0) < res)
+	console.log(subsets, subsets.length)
+	while(currentPrime < res && subsets.length > 0) {
+		//we test against all possible subsets for a solution less than our res
+		let subsetsIndex = 0
+		const filteredSubset = []
+		while (subsetsIndex < subsets.length) { 
+			const subset = subsets[subsetsIndex]
+
+			let subsetPrimeIndex = 0
+			let subsetSum = 0
+			while (subsetPrimeIndex < subset.length) {
+				const subsetPrime = subset[subsetPrimeIndex]
+				if (!isPrimePair(currentPrime, subsetPrime)) {
+					break;
 				}
+				subsetPrimeIndex++
+			}
 
-				if (currentPrime > n * Math.pow(10, pow10 - 1)) {
-					console.log(`Checking primes greater than ${n * Math.pow(10, pow10 - 1)}, currentPrime:${currentPrime}`) 
-					n++
-				}
+			const sum = subset.reduce((acc, num) => acc + num, 0) + currentPrime
+			if (subsetPrimeIndex === subset.length) {
 
-				if (pow10 === 9) {
-					console.log('early exit, try a more efficient solution')
-				}
-				let candidatesPointer = 0
-				while (candidatesPointer < candidates.length) {
-					if (!isPrimePair(candidates[candidatesPointer], currentPrime)) {
-						break;
+				if (sum < res) {
+					//if target amount great!, if less than we add it to possibilties
+					if (subset.length + 1 === target) {
+						res = sum
+
+						//some sort of good filter?
+					} else if (subset.length + 1 < target) {
+						const newSubset = subset.slice()
+						newSubset.push(currentPrime)
+						// subsets.push(newSubset)
+						filteredSubset.push(newSubset)
 					}
-					candidatesPointer++
 				}
-
-				if (candidatesPointer === candidates.length) {
-					candidates.push(currentPrime)
-					console.log(`New addition, current list: ${candidates}`)
-				}
-				
-				if (candidates.length === target) {
-					res = candidates.reduce((acc, sum) => acc + sum, 0);
-				}
+				//if (sum > res) regardless, we don't want to work with it
+			} else if (sum < res) {
+				filteredSubset.push(subset)
 			}
-
-			currentPrime += 2 //increment by 2 to stay on odd numbers, 
+			subsetsIndex++
 		}
-
-		console.log(`derp, candidates: ${candidates}`)
+		primeIndex++
+		if (primeIndex === primes.length) {
+			throw new Error('Exhausted all prime options, WIP')
+		}
+		currentPrime = primes[primeIndex]
+		subsets = filteredSubset
+		console.log(`Working with ${currentPrime} and ${subsets.length} subsets`)
 	}
-	// we have list/set containing 5 primes that produce another prime when concatenating any 2 primes in any order
 
-	//test any other possible combinations of prime, once these possibilities are guranteed to be a sum greater than our min, we've exhausted all our options
-		//pop the last prime
-			//any additional prime will be greater than our current sub min, so we pop again
-
-
-				//we should be at 3 primes, 4th prime should be the "next one" that fits what we're looking for for the 4th option,
-				 //if its still less than our current min (or we can look at sub mins to optimize) then we keep populating
-		//Overall ^ is a recursive process until we have an empty subset, we increment our leftmost prime until its guranteed to be greater than our min (possible optimizations here again by running against sub-mins)	
+	return res
 }
 
-//Note to self, we start with a solution solving for min of 4, once it "works", we adjust to 5
-problem60(5)
 
+
+
+
+//Note to self, we start with a solution solving for min of 4, once it "works", we adjust to 5
+// problem60(5)
+// try {
+// 	console.log('p60:', problem60(5))
+// } catch(error) {
+// 	console.error(error)
+// }
+
+//26033 is a solution with [13, 5197, 5701, 6733, 8389]
+	//need to verify theres no solution less than
 // let test = [3, 7, 109, 673] 
