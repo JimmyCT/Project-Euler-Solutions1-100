@@ -1,4 +1,5 @@
-const gf = require(__dirname + '/generalFunctions.js')
+// const gf = require(__dirname + '/generalFunctions.js')
+import gf from "./generalFunctions.js"
 //problem 51 Prime digit replacements
 
 // //Power set

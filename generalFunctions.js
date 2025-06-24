@@ -1,5 +1,5 @@
-const fs = require('fs');
-
+// const fs = require('fs');
+import fs from "fs"
 // **NOTE**
 // Probably want to split into something more specific than "general" functions, 
 // String funcs, math funcs, something something helper?
@@ -44,7 +44,7 @@ class PyramidNode extends Node {
 
 
 //Given a list of numbers,
-//return the numbers as a tree
+//return the numbers as a binary tree
 function treeify(nums) {
 	//let parent node = p, then left childNode (lc) lc = 2p + 1 and right child (rc) rc = 2p + 2
 	const n = nums.length
@@ -515,4 +515,5 @@ for (let i = 0; i < 200; i++) {
 
 
 */
-module.exports = {strSum, strMultiplication, strPow, getPrimes, getPrimeBools, getPrimeData, expandPrimes, fetchData, nextPermutationNums}
+// module.exports = {strSum, strMultiplication, strPow, getPrimes, getPrimeBools, getPrimeData, expandPrimes, fetchData, nextPermutationNums}
+export default {strSum, strMultiplication, strPow, getPrimes, getPrimeBools, getPrimeData, expandPrimes, fetchData, nextPermutationNums, treeify}
