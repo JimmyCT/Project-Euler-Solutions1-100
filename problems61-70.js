@@ -1,3 +1,5 @@
+import gf from "./generalFunctions.js"
+
 //Problem 61 Cylical figurate numbers
 
 //Cylic
@@ -5,14 +7,21 @@
 		//len 1, 2, or 3??? 4 digit numbers
 
 
-//Mark and check which polygonal numbers have been checked
+//Cycles don't have to be in order, i.e. it can be square => triangular => pentagonal instead of tri => square => pent 
+//we assume cylic sets have matching numbers specifically for the last 2 with the first 2 digits, not 1 or 3
+//We also know we're looking for a six cyclic 4-digit number
 
+//OKAY so assuming we only need to check last 2 digits against first 2 digits and not (1 OR 3)
+//we can make our last vastly easier by
+	//spliting n-polygonal type numbers into two data structures, one mapping first two digits (00 - 99, 100 keys max) to a list containing all n-polygonal containing those two digits and the same concept but mapping last two digits
+
+//We do an exhaust all options type algorithm where we do 6_P_6 => 6! steps problem (we work with 6 polygonal types)
+	//we have n-polygonal types ordered by a permutation style algo (6 types choose 6)
+	//In whatever specific order we're working with, going left to right, we check for a cycle matching our criteria (assumption: 2 digits only, can modify here to check 1,2,3 digits)
+
+//if we don't find a solution once all options are exhausted, either theres a problem with our code OR.... derp  
 function problem61() {
 	const triNums = []
-	// const firstTriNums = [] // first two digits
-	// const lastTriNums = [] // last two digits
-	const firstToLastTriNums = new Map()
-
 	let triIndex = 1
 	function getNextTriangle() {
 		const res = triIndex * (triIndex + 1) / 2
@@ -29,27 +38,15 @@ function problem61() {
 		triNums.push(triNum)
 		// firstTriNums.push(`${triNum}`.slice(0, 2))
 		// lastTriNums.push(`${triNum}`.slice(2))
-		const first = `${triNum}`.slice(0, 2)
-		const last = `${triNum}`.slice(2)
-
-		const list = firstToLastTriNums.get(first)
-
-		if (list === undefined) {
-			firstToLastTriNums.set(first, [last])
-		} else {
-			list.push(last)
-		}
+		// const first = `${triNum}`.slice(0, 2)
+		// const last = `${triNum}`.slice(2)
 
 		triNum = getNextTriangle()
 
 	}
 	
-	// console.log(triNums, '\n', firstTriNums, '\n', lastTriNums)
-	console.log(triNums, '\n', firstToLastTriNums)
-
-	return;
-
 	const squareNums = []
+	const firstToLastSquareNums = new Map()
 
 	let squareIndex = 1
 	function getNextSquare() {
@@ -65,16 +62,24 @@ function problem61() {
 
 	while (squareNum < Math.pow(10, 4)) {
 		squareNums.push(squareNum)
+		// const first = `${squareNum}`.slice(0, 2)
+		// const last = `${squareNum}`.slice(2)
+
+		// const list = firstToLastSquareNums.get(first)
+
+		// if (list === undefined) {
+		// 	firstToLastSquareNums.set(first, [last])
+		// } else {
+		// 	list.push(last)
+		// }
 		squareNum = getNextSquare()
 	}
 
 
 
 
-
-
-	let pentaNums = []
-
+	const pentaNums = []
+	const firstToLastPentaNums = new Map() 
 	let pentIndex = 1
 	function getNextPentagonal() {
 		//n(3n -1) / 2
@@ -90,16 +95,24 @@ function problem61() {
 
 	while (pentaNum < Math.pow(10, 4)) {
 		pentaNums.push(pentaNum)
+		// const first = `${pentaNum}`.slice(0, 2)
+		// const last = `${pentaNum}`.slice(2)
+
+		// const list = firstToLastPentaNums.get(first)
+		// if (list === undefined) {
+		// 	firstToLastPentaNums.set(first, [last])
+		// } else {
+		// 	list.push(last)
+		// }
 		pentaNum = getNextPentagonal()
 	}
 
 
 
 
-
-
-
 	const hexaNums = []
+	const firstToLastHexaNums = new Map()
+
 
 	let hexaIndex = 1
 	function getNextHexagonal() {
@@ -116,16 +129,23 @@ function problem61() {
 
 	while (hexaNum < Math.pow(10, 4)) {
 		hexaNums.push(hexaNum)
+		// const first = `${hexaNum}`.slice(0, 2)
+		// const last = `${hexaNum}`.slice(2)
+
+		// const list = firstToLastHexaNums.get(first)
+
+		// if (list === undefined) {
+		// 	firstToLastHexaNums.set(first, [last])
+		// } else {
+		// 	list.push(last)
+		// }
 		hexaNum = getNextHexagonal()
 	}
 
 
 
-
-
-
 	const heptaNums = []
-
+	// const firstToLastHeptaNums = new Map()
 	let heptaIndex = 1
 	function getNextHeptagonal() {
 		//n(5n - 3) / 2
@@ -141,14 +161,22 @@ function problem61() {
 
 	while (heptaNum < Math.pow(10, 4)) {
 		heptaNums.push(heptaNum)
+		// const first = `${heptaNum}`.slice(0, 2)
+		// const last = `${heptaNum}`.slice(2)
+
+		// const list = firstToLastHeptaNums.get(first)
+
+		// if (list === undefined) {
+		// 	firstToLastHeptaNums.set(first, [last])
+		// } else {
+		// 	list.push(last)
+		// }
 		heptaNum = getNextHeptagonal()
 	}
 
-
-
-
 	const octaNums = []
-
+	const firstToLastOctaNums = new Map(
+		)
 	let octaIndex = 1
 	function getNextOctagonal() {
 		//n(3n - 2)
@@ -164,25 +192,162 @@ function problem61() {
 
 	while (octaNum < Math.pow(10, 4)) {
 		octaNums.push(octaNum)
+		// const first = `${octaNum}`.slice(0, 2)
+		// const last = `${octaNum}`.slice(2)
+
+		// const list = firstToLastOctaNums.get(first)
+
+		// if (list === undefined) {
+		// 	firstToLastOctaNums.set(first, [last])
+		// } else {
+		// 	list.push(last)
+		// }
 		octaNum = getNextOctagonal()
 	}
 
+	const figTypes = [3,4,5,6,7,8]
+	// const figTypes = [3,4,5]
+	const figTypeNums = []
+	const figTypeNumsSplit = []
+	figTypeNums['3'] = triNums
+	figTypeNums['4'] = squareNums
+	figTypeNums['5'] = pentaNums
+	figTypeNums['6'] = hexaNums
+	figTypeNums['7'] = heptaNums
+	figTypeNums['8'] = octaNums
+	//Now that we have some sort of structure for each type of figurate/polygonal number matching
 
-	console.log(triNums)
-	console.log(squareNums)
-	console.log(pentaNums)
-	console.log(hexaNums)
-	console.log(heptaNums)
-	console.log(octaNums)
+	//create map, n-polygonal fig type to object containing "start" and "end" maps
+	for (const figType of figTypes) {
+		const figNums = figTypeNums[figType]
+		//start map: 00-99 => list of n-polygonal numbers starting with num in range [00-99] 
+		//end map => 00-99 => list of n-polygonal numbers ending in num in range [00-99]
 
+		const start = new Map()
+		const end = new Map()
+
+		// console.log(`The ${figType}-polygonal numbers are ${figTypeNums[figType]}`)
+		for (const figNum of figNums) {
+			const s = `${figNum}`.slice(0, 2)
+			const e = `${figNum}`.slice(2)
+			
+			if (start.has(s)) {
+				start.get(s).push(e)
+			} else {
+				start.set(s, [e])
+			}
+
+			if (end.has(e)) {
+				end.get(e).push(s)
+			} else {
+				end.set(e, [s])
+			}
+		}
+
+		figTypeNumsSplit[figType] = {start, end}
+	}
+
+	// use figurate types to determine cycle order
+		// if all of the orders are exhausted and we haven't found a solution, either code is wrong... or we wrote the code poorly... 
+	const limit = factorial(figTypes.length)
+	let i = 0
+	while (i < limit) {
+		//work with the current fig type order
+		//if this particular order has no solutions, check next order
+		
+		//We check all fig nums of our left most fig type
+			//specifically all endings of our left most fig type
+		const baseFigType = figTypes[0]
+		const baseEnds = figTypeNumsSplit[baseFigType].end;
+
+
+		for (const baseEnd of baseEnds.keys()) {
+			const baseStartValues = figTypeNumsSplit[baseFigType].end.get(baseEnd)
+			let pointer = 1
+			let leftEnd = baseEnd
+
+
+			let outputScramble = []
+			const nestedStack = new Array(figTypes.length).fill(null).map(() => new Array())
+
+			while (pointer < figTypes.length && pointer > 0) {
+				const rightStarts = figTypeNumsSplit[figTypes[pointer]].start
+
+				if (rightStarts.has(leftEnd)) {
+					//we need to store end values from right end that have a start matching left end value
+					outputScramble.push(leftEnd, leftEnd)
+					nestedStack[pointer] = rightStarts.get(leftEnd).slice()
+					pointer++
+					leftEnd = nestedStack[pointer - 1].pop()
+				} else {
+					leftEnd = nestedStack[pointer - 1].pop()
+					while (leftEnd === undefined) {
+						pointer--
+						if (pointer < 1) break;
+						leftEnd = nestedStack[pointer - 1].pop()
+					}
+				}
+			}
+
+			// if (pointer < 1) {
+			// 	//cycle not found check next
+			// }
+
+			if (pointer === figTypes.length) {
+				//at this point, we just need to see if our base start matches with any of the end digits for the right most fig type
+				//we could check each end fig type to see if its our start or one of our starts, OR check if one of our base starts is in the right fig end digts 
+
+				//we already stored our leftmost starts at baseStartValues
+				//we have variable leftEnd to track our end digits still and pointer is pointing at the rightmost figure, 
+				while (leftEnd !== undefined) {
+					for (const s of baseStartValues) {
+						// if (s === leftEnd) return 'Cycle found, add additional data here'
+						if (s === leftEnd) {
+							outputScramble.unshift(leftEnd)
+							outputScramble.push(leftEnd)
+
+							const lessScrambled = []
+							for (let i = 0; i < outputScramble.length; i = i + 2) {
+								lessScrambled.push(`${outputScramble[i]}${outputScramble[i + 1]}`)
+							}
+
+							console.log(`Cycle found, verifying fig order ${figTypes}, ${lessScrambled}`)
+							for (let i = 0; i < figTypes.length; i++) {
+								const f = figTypes[i]
+								if (!figTypeNums[f].includes(Number(lessScrambled[i]))) {
+									console.log(`wait, ${lessScrambled[i]} is not an ${f}-polygonal number`)
+								}
+							}
+							// return(`Cycle found with the following fig order: ${figTypes}, ${lessScrambled}`)
+							console.log('verified')
+							const outputSum = lessScrambled.reduce((acc, curr) => acc + Number(curr), 0)
+							return `The sum of our 6 numbers that form a cycle in the order specified by P61 of Project Euler is ${outputSum}`
+						}
+					}
+
+					leftEnd = nestedStack[pointer - 1].pop()
+				}
+
+			}
+		}
+
+		nextPermutation(figTypes)
+		i++
+	}
+	console.log(`Yeah it didn't work`)
+			//maybe k digits, where k = 2 initial assumption is wrong
+		//Once all options in that order are exhuated,
+			//i.e. leftmost n-polygonal type exhausts all 4 digit numbers without a solution
+			//We try the next option 
 }
 
-problem61()
+console.log(problem61())
+
 
 //Option 1:
 	//Store all 4 digit results of the figurate numbers
-		//assuming we are looking for 2 digit cycles, so last two digits of one digit matches first two digits of another figurate we haven't seen yet
-			//we can rewrite our code to check for last 1-3 digit matching first/first three digit(s) of unseen marked figurate sets
+		//assuming we are looking for 2 digit cycles, so last two digits of one digit matches first two digits of another figurate numbers we haven't seen yet
+			//we can rewrite our code to check for last 1-3 digit matching first/first three digit(s) of unseen marked figurate numbers sets
 				//for the sake of a quick solution instead of a generalized one, we check for 2 digit cycles first, if there isn't one, we check forr 1 or 3, if there isn't one, issue is probably within our code
 
 //Option2: 
@@ -199,3 +364,114 @@ problem61()
 	//We are also working with the asssuption that the cycles only invovle two digits, if the cycles coiuld be 1 digit or even 3 digits (4 digits would only work if there would a 4 digit number that exists in every figurate set)
 		//if there are 1 or 3 digit cycles, we may need to make use of more data structures to store these patterns, but again we're expecting constant space due to being 1-3 digits from 4 digit numbers only, i.e. a limited amount
 	//Option 2 is actually just option 1 worked out to store "sub" digits instead of the number as a whole... oh
+
+
+
+
+const testArr = [4,5,6,7]
+// [4,5,6,7] 
+// [4,5,7,6]
+// [4,6,5,7]
+// [4,6,7,5] // find first digit where last is less than, than find first digit where last digit is greater, swap those two
+// [4,7,5,6]
+// [4,7,6,5]
+// [5,4,6,7]
+
+//In-place swap, returns nothing
+function swap(arr, i, j) {
+	const tmp = arr[i]
+	arr[i] = arr[j]
+	arr[j] = tmp
+}
+
+//Modified reverse, instead of reversing the whole array, it reverses a subsection of the list in place
+function reverse(arr, i, j = arr.length - 1) {
+	while (i < j) {
+		swap(arr, i, j)
+		i++
+		j--
+	}
+}
+
+function factorial(n) {
+	const dp = [1, 1]
+	while (dp.length <= n) {
+		dp.push(dp.length * dp[dp.length - 1])
+	}
+	return dp[n] //same thing as dp[dp.length - 1]
+}
+
+function nextPermutation(arr) {
+	let i = arr.length - 1
+	// from right to left find pair such that right > left
+		//keep track of left value
+	// starting at the right side again, find first value > the stored left value
+		//swap
+		//than reverse the list
+
+	while (i > 0) {
+		if (arr[i - 1] < arr[i]) {
+			let j = arr.length - 1 
+
+			while (arr[j] < arr[i - 1]) {
+				j--
+			}
+			swap(arr, i - 1, j)
+			reverse(arr, i)
+			return;
+		}
+		i--
+	}
+	
+	//reverse the whole array
+	reverse(arr, i)
+}
+
+//for a list of length n, we expect n! n choose n permutations
+// for (let i = 0; i < factorial(testArr.length); i++) {
+// 	console.log(testArr)
+// 	nextPermutation(testArr)
+// }
+
+//dfs type of solution
+const testTree = gf.treeify([0,1,2,3,4,5,6,7,8, 9])
+
+
+//DFS algorithm without use of recursion
+//The idea really is to come up with something that _could_ help with p61
+function dfs(tree) {
+	const root = tree
+	const stack = [root]
+
+	while(stack.length > 0) {
+		const curr = stack.pop()
+		console.log(curr.val)
+		if (curr.right) stack.push(curr.right);
+		if (curr.left) stack.push(curr.left);
+	}
+}
+
+
+// dfs(testTree) // Expect order: 0 1 3 7 8 4 9 2 5 6 
+const testSet = new Set()
+
+class Node {
+	constructor(val, left, right) {
+		if (val === undefined) {
+			throw new Error('Please provide a val for node')
+		}
+		this.val = val
+		this.left = left || null
+		this.right = right || null
+	}
+}
+
+const testNode = new Node(2)
+let testArr1 = [1,2,3]
+let testArr2 = testArr1
+
+testSet.add(testArr1)
+testArr1 = 'different data type'
+// console.log(testSet.has(testArr1)) //false
+// console.log(testSet.has(testArr2)) //true
+// console.log(testSet.has([1,2,3])) // false
