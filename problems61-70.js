@@ -341,7 +341,7 @@ function problem61() {
 			//We try the next option 
 }
 
-console.log(problem61())
+// console.log(problem61())
 
 
 //Option 1:
@@ -413,7 +413,7 @@ function nextPermutation(arr) {
 		if (arr[i - 1] < arr[i]) {
 			let j = arr.length - 1 
 
-			while (arr[j] < arr[i - 1]) {
+			while (arr[j] <= arr[i - 1]) {
 				j--
 			}
 			swap(arr, i - 1, j)
@@ -475,3 +475,102 @@ testArr1 = 'different data type'
 // console.log(testSet.has(testArr1)) //false
 // console.log(testSet.has(testArr2)) //true
 // console.log(testSet.has([1,2,3])) // false
+
+
+//Problem 62
+
+
+function problem62(n = 111, target = 3) {
+	let res = null
+	// we look for a number n where n^3 has 4 other permutations that are also cubes
+	while(res === null) {
+		console.log(`Checking ${n}`)
+		const cubes = []
+		// const cubedN = Math.pow(n, 3)
+		// const digits = `${cubedN}`.split('')
+		const digits = `${Math.pow(n, 3)}`.split('')
+		const digitCounts = {}
+		for (const d of digits) {
+			digitCounts[d] = digitCounts[d] ? digitCounts[d] + 1 : 1
+		}
+
+		//we know the current number is a cube, but for a general solution, we'll start our "check" with it anyways
+		// cubes.push(digits.slice())
+		// nextPermutation(digits)
+
+
+		const limitNumerator = factorial(digits.length)
+		let limitDenominator = 1
+
+		for (const digit in digitCounts) {
+			limitDenominator *= factorial(digitCounts[digit])
+		}
+
+		const limit = limitNumerator / limitDenominator + 1
+		let iteration = 1
+		const seen = new Map()
+		while(iteration < limit) {
+			if (seen.has(digits.join(''))) {
+				console.log(`we've seen this iteration before at itr:${seen.get(digits.join(''))}`)
+				console.log(digits.join(''))
+				return;
+			}
+			seen.set(digits.join(''), iteration)
+			if (digits[0] === '0') {
+				iteration++
+				nextPermutation(digits)
+				continue;
+			}
+
+			if (Number.isInteger(Math.cbrt(Number(digits.join(''))))) {
+				cubes.push(digits.slice())
+
+				if (cubes.length === target) {
+					res = n
+					break;
+				}
+			}
+			iteration++
+			nextPermutation(digits)
+		}
+
+		n++
+	}
+
+	return res
+}
+
+// console.log(problem62())
+//We know n = 345 is the smallest n where n cubed has 3 permutations (including itself) that are also cube
+console.log(problem62(346, 5))
+// console.log(problem62(10, 3))
+
+
+// const d = `${Math.pow(111, 3)}`.split('')
+// //limit = n! / (product(n_k!)) where n_k = duplicate count
+// let numerator = factorial(d.length)
+// let denominator = 1
+// const digitCount = {}
+// for (const tmp of d) {
+// 	if (digitCount[tmp] === undefined) digitCount[tmp] = 1;
+// 	else digitCount[tmp]++
+// }
+
+// for (const digit in digitCount) {
+// 	denominator *= factorial(digitCount[digit])
+// }
+// const l =  numerator / denominator + 1
+// let i = 1
+// const p = []
+// const seenNums = new Map()
+// while (i < l) {
+// 	if (seenNums.has(d.join(''))) {
+// 		console.log(`been here before, current itr:${i}, seen at ${seenNums.get(d.join(''))}, ${d}`)
+// 		break;
+// 	}
+
+// 	seenNums.set(d.join(''), i)
+// 	p.push(d.slice())
+// 	i++
+// 	nextPermutation(d)
+// } 
