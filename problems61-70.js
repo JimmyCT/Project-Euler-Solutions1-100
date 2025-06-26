@@ -479,59 +479,28 @@ testArr1 = 'different data type'
 
 //Problem 62
 
-
-function problem62(n = 111, target = 3) {
+//The idea is we take a number n cubed, and sort the digits in order from LTG and we store that specific orderr
+	//if we see that order again, it means another number cubed contains the same permutation - store in a list tied by that specific permutation
+//Each time we reach a new order of magnitude (add another digit for the cubed form)
+	//none of our previous options will work so we can optimize storage by wiping previous options
+function problem62(n = 1, target = 3) {
 	let res = null
-	// we look for a number n where n^3 has 4 other permutations that are also cubes
-	while(res === null) {
-		console.log(`Checking ${n}`)
-		const cubes = []
-		// const cubedN = Math.pow(n, 3)
-		// const digits = `${cubedN}`.split('')
-		const digits = `${Math.pow(n, 3)}`.split('')
-		const digitCounts = {}
-		for (const d of digits) {
-			digitCounts[d] = digitCounts[d] ? digitCounts[d] + 1 : 1
-		}
+	
+	const permutations = new Map()
+	while (res === null) {
+		const cubedN = Math.pow(n, 3)
+		const digits = `${cubedN}`.split('');
+		digits.sort((a, b) => a - b)
 
-		//we know the current number is a cube, but for a general solution, we'll start our "check" with it anyways
-		// cubes.push(digits.slice())
-		// nextPermutation(digits)
-
-
-		const limitNumerator = factorial(digits.length)
-		let limitDenominator = 1
-
-		for (const digit in digitCounts) {
-			limitDenominator *= factorial(digitCounts[digit])
-		}
-
-		const limit = limitNumerator / limitDenominator + 1
-		let iteration = 1
-		const seen = new Map()
-		while(iteration < limit) {
-			if (seen.has(digits.join(''))) {
-				console.log(`we've seen this iteration before at itr:${seen.get(digits.join(''))}`)
-				console.log(digits.join(''))
-				return;
+		if (permutations.has(digits.join(''))) {
+			// permutations.get(digits.join('')).push(n)
+			const candidates = permutations.get(digits.join(''))
+			candidates.push(n)
+			if (candidates.length === target) {
+				res = Math.pow(candidates[0], 3) //by nature of its insertion order, the smallest value should be the first one in the list
 			}
-			seen.set(digits.join(''), iteration)
-			if (digits[0] === '0') {
-				iteration++
-				nextPermutation(digits)
-				continue;
-			}
-
-			if (Number.isInteger(Math.cbrt(Number(digits.join(''))))) {
-				cubes.push(digits.slice())
-
-				if (cubes.length === target) {
-					res = n
-					break;
-				}
-			}
-			iteration++
-			nextPermutation(digits)
+		} else {
+			permutations.set(digits.join(''), [n])
 		}
 
 		n++
@@ -540,37 +509,5 @@ function problem62(n = 111, target = 3) {
 	return res
 }
 
-// console.log(problem62())
-//We know n = 345 is the smallest n where n cubed has 3 permutations (including itself) that are also cube
-console.log(problem62(346, 5))
-// console.log(problem62(10, 3))
+// console.log(problem62(346, 5))
 
-
-// const d = `${Math.pow(111, 3)}`.split('')
-// //limit = n! / (product(n_k!)) where n_k = duplicate count
-// let numerator = factorial(d.length)
-// let denominator = 1
-// const digitCount = {}
-// for (const tmp of d) {
-// 	if (digitCount[tmp] === undefined) digitCount[tmp] = 1;
-// 	else digitCount[tmp]++
-// }
-
-// for (const digit in digitCount) {
-// 	denominator *= factorial(digitCount[digit])
-// }
-// const l =  numerator / denominator + 1
-// let i = 1
-// const p = []
-// const seenNums = new Map()
-// while (i < l) {
-// 	if (seenNums.has(d.join(''))) {
-// 		console.log(`been here before, current itr:${i}, seen at ${seenNums.get(d.join(''))}, ${d}`)
-// 		break;
-// 	}
-
-// 	seenNums.set(d.join(''), i)
-// 	p.push(d.slice())
-// 	i++
-// 	nextPermutation(d)
-// } 
