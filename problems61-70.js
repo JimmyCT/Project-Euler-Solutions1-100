@@ -493,14 +493,13 @@ function problem62(n = 1, target = 3) {
 		digits.sort((a, b) => a - b)
 
 		if (permutations.has(digits.join(''))) {
-			// permutations.get(digits.join('')).push(n)
 			const candidates = permutations.get(digits.join(''))
-			candidates.push(n)
+			candidates.push(cubedN)
 			if (candidates.length === target) {
-				res = Math.pow(candidates[0], 3) //by nature of its insertion order, the smallest value should be the first one in the list
+				res = candidates[0] //by nature of its insertion order, the smallest value should be the first one in the list
 			}
 		} else {
-			permutations.set(digits.join(''), [n])
+			permutations.set(digits.join(''), [cubedN])
 		}
 
 		n++
@@ -511,3 +510,152 @@ function problem62(n = 1, target = 3) {
 
 // console.log(problem62(346, 5))
 
+//Problem 63
+//How many n-digit postive integers exists where it is also an n-th power number
+	//ex: 16807 is 5 digits and also 7^5
+function problem63() {
+	let res = 0
+	//Soooo whats our limit??
+	//We go until any number to the power of n will ALWAYS have more than n digits
+
+	let n = 1
+	//inclusive exclusive range: [min, max) for numbers that have n digits
+	let min = Math.pow(10, n - 1)
+	let max = gf.strPow('10', n)
+	// The smallest number whose n-th power is >= min
+	let num = Math.ceil(Math.pow(min, (1 / n)))
+	while (gf.compareStrNums(`${gf.strPow(`${num}`, n)}`, max) === -1) {
+		while (gf.compareStrNums(`${gf.strPow(`${num}`, n)}`, max) === -1) {
+			// gf.compareStrNums(`${Math.pow(num, n)}`, max)
+			console.log(num, n, gf.strPow(`${num}`, n), max)
+			res++
+			num++
+		}
+		n++
+		min = Math.pow(10, n -1)
+		max = gf.strPow('10', n)
+		num = Math.ceil(Math.pow(min, (1 / n)))
+	}
+
+	return res
+}
+
+// console.log(problem63())
+
+
+//_PROBABLY_ going to need more decimal precision 
+	//idk what javascript has to offer for irrational values... 
+	//but maybe to check for a cycle, we can split our irrational value into a numerator and denominator
+		//and then we keep track of the irrational values involved in either and 
+		//ex: 23 + 5 + sqrt(10) !== 23 + 3 + 1 + sqrt(10)
+
+
+//Let b_n = a_n + x_n; a = set of all (postive?) integers 
+//let b_0 = Math.sqrt(n)
+//let a_n = Math.floor(b_n)
+	//x_n = 1 / b_n + 1 => b_n = 1 / x_n - 1
+	//Should have everything we need (except maybe precision) 
+function problem64() {
+	function convertIrrationalNumToCF(n) {
+		const intValues = []
+		const irrationalValues = []
+		let tmp = Math.sqrt(n)
+		intValues.push(Math.floor(tmp))
+		irrationalValues.push(tmp - intValues[0])
+		tmp = 1 / irrationalValues[0]
+
+		//While we find something that confirms the cycle/period 
+		while(null) {
+			intValues.push(Math.floor(tmp))
+			irrationalValues.push(tmp - intValues[intValues.length - 1])
+			tmp = 1 / irrationalValues[irrationValues.length - 1]
+		}
+	}
+}
+
+
+
+//logically, really high number has a high numerator and a low denominator
+	// denominator = totient(n), to get a low totient(n), we need a large n that consists of the most different number of primes we  can get
+		//looking for some greatest number < 1 million that contains the most prime factors
+			//so..... 2 * 3 * 5 * 7 * ... 
+			//in other words: let p_i = a prime in the set of primes, Max(product(p_0 + p_1 + ... P_k) < 1million)
+
+	//ex: n = 10, 2 * 3 * 5 > 10; so 2 * 3 = 6, there are 
+function problem69(limit) {
+	if (limit < 2) {
+		return 0
+	}
+
+	const {primes} = gf.getPrimeData(limit)
+	let res = 2
+	let maxRatio = 1
+	function primeFactorization(n) {
+		let num = n
+		let res = {}
+		//the greatest number that can divide into n is Math.sqrt(n)
+		let primeIndex = 0
+
+		while(num > 1 && primeIndex < primes.length) {
+			const prime = primes[primeIndex]
+
+			if (num % prime === 0) {
+				if (res[prime] === undefined) res[prime] = 1;
+				else res[prime]++;
+
+				num = num / prime
+			} else {
+				primeIndex++
+			}
+		}
+
+		if (num !== 1) {
+			//num should be a prime number
+			if (res[num] === undefined) res[num] = 1;
+			else res[num]++;
+		}
+
+		return res;
+	}	
+	//Given a number n
+	//return the number of positive integers relatively prime to n
+	function totient(n) {
+		if (n === 1) return 0;
+		let count = 1 //1 is relatively prime to all numbers n >= 2
+		let num = 2
+		const primeFactors = Object.keys(primeFactorization(n))
+		while (num < n) {
+			let i = 0
+			while (i < primeFactors.length) {
+				if (num % Number(primeFactors[i]) === 0) {
+					break;
+				}
+				i++
+			}
+
+			if (i === primeFactors.length) {
+				//relatively prime
+				count++
+			}
+			num++
+		}
+		
+		return count
+	}
+	
+	let n = 2
+	while (n < limit) {
+		console.log(`working on ${n}`)
+		const ratio = n / totient(n)
+		if (ratio > maxRatio) {
+			res = n
+			maxRatio = ratio
+		}
+
+		n++
+	}
+
+	return res
+}
+
+console.log(problem69(Math.pow(10, 2) + 1))
