@@ -576,10 +576,10 @@ function problem64() {
 
 
 //logically, really high number has a high numerator and a low denominator
-	// denominator = totient(n), to get a low totient(n), we need a large n that consists of the most different number of primes we  can get
-		//looking for some greatest number < 1 million that contains the most prime factors
+	// denominator = totient(n), to get a low totient(n), we get as many different prime values involved as possible
+		//to do this we keep multiplying by the next smallest prime number while the final product stays under our limit
 			//so..... 2 * 3 * 5 * 7 * ... 
-			//in other words: let p_i = a prime in the set of primes, Max(product(p_0 + p_1 + ... P_k) < 1million)
+			//in other words: let p_i = a prime in the set of primes, Max(product(p_0 + p_1 + ... P_k) < limit)
 
 	//ex: n = 10, 2 * 3 * 5 > 10; so 2 * 3 = 6, there are 
 function problem69(limit) {
@@ -588,8 +588,15 @@ function problem69(limit) {
 	}
 
 	const {primes} = gf.getPrimeData(limit)
-	let res = 2
-	let maxRatio = 1
+	
+	let n = 1
+	let primeIndex = 0
+	while (n * primes[primeIndex] < limit) {
+		n *= primes[primeIndex]
+		primeIndex++
+	}
+	
+	return n;
 	function primeFactorization(n) {
 		let num = n
 		let res = {}
@@ -642,20 +649,8 @@ function problem69(limit) {
 		
 		return count
 	}
-	
-	let n = 2
-	while (n < limit) {
-		console.log(`working on ${n}`)
-		const ratio = n / totient(n)
-		if (ratio > maxRatio) {
-			res = n
-			maxRatio = ratio
-		}
-
-		n++
-	}
 
 	return res
 }
 
-console.log(problem69(Math.pow(10, 2) + 1))
+console.log(problem69(Math.pow(10, 6) + 1))
