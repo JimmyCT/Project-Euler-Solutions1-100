@@ -152,6 +152,34 @@ async function convertFileIntoPyramid(path) {
 	return res
 }
 
+//Main use is to compare two very large numbers 
+	//Input: two string numbers
+	//Output: -1 where str1 < str2
+	//				0 where str1 === str2
+	//  			1 where str1 > str2
+function compareStrNums(str1, str2) {
+	if (str1.length < str2.length) {
+		return -1
+	} else if (str1.length > str2.length) {
+		return 1
+	}
+
+	let i = 0
+	while (i < str1.length) {
+		const digit1 = Number(str1[i])
+		const digit2 = Number(str2[i])
+
+		if (digit1 < digit2) {
+			return -1
+		} else if (digit1 > digit2) {
+			return 1
+		}
+
+		i++
+	}
+
+	return 0
+}
 //Given two string non-negative integers,
 //Returrn the sum of both strings as a String
 
@@ -373,9 +401,10 @@ function getPrimeBools(n) {
 	return primeBools;
 }
 
+//return list of primes < n
 function getPrimeData(n) {
 	const primes = []
-	const primeBools = new Array(n).fill(true) //primeBool[num] = true/false, boolean determines if index number is prime or not
+	const primeBools = new Array(Math.ceil(n)).fill(true) //primeBool[num] = true/false, boolean determines if index number is prime or not
 
 	//start at 2 because 1 is not prime,
 	let i = 2
@@ -394,6 +423,37 @@ function getPrimeData(n) {
 	}
 
 	return {primes, primeBools}
+}
+
+
+//Given a number n, return a hashtable mapping prime factors to their count
+function primeFactorization(n) {
+	let num = n
+	let res = {}
+	//the greatest number that can divide into n is Math.sqrt(n)
+	const {primes} = getPrimeData(Math.sqrt(n) + 1)
+	let primeIndex = 0
+
+	while(num > 1 && primeIndex < primes.length) {
+		const prime = primes[primeIndex]
+
+		if (num % prime === 0) {
+			if (res[prime] === undefined) res[prime] = 1;
+			else res[prime]++;
+
+			num = num / prime
+		} else {
+			primeIndex++
+		}
+	}
+
+	if (num !== 1) {
+		//num should be a prime number
+		if (res[num] === undefined) res[num] = 1;
+		else res[num]++;
+	}
+
+	return res;
 }
 
 //Deprecated, please use expandPrimeData
@@ -516,4 +576,4 @@ for (let i = 0; i < 200; i++) {
 
 */
 // module.exports = {strSum, strMultiplication, strPow, getPrimes, getPrimeBools, getPrimeData, expandPrimes, fetchData, nextPermutationNums}
-export default {strSum, strMultiplication, strPow, getPrimes, getPrimeBools, getPrimeData, expandPrimes, fetchData, nextPermutationNums, treeify}
+export default {strSum, strMultiplication, strPow, getPrimes, getPrimeBools, getPrimeData, expandPrimes, fetchData, nextPermutationNums, treeify, compareStrNums, primeFactorization}
