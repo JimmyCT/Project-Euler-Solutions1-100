@@ -2,6 +2,36 @@ import gf from './generalFunctions.js'
 
 const __dirname = import.meta.dirname
 
+//Problem 97 - Large Non-Mersenne Prime
+
+// (a * b) mod m === (a_r * b_r) mod m where a_r = a mod m and b_r = b mod m
+// (a * b * c * ...) === (a_r * b_r * c_r *... ) mod m where a_r = a mod m .... x_r = x mod m
+
+
+function p97() {
+	//evalulate 2^7830457 sortaaaa, we only really care about the last 10 digits
+		//go through powers of 2 until we have a number with 10 digits
+		//continue but we only care about the last 10 digits
+	let res = 1
+	let i = 0
+	while (i < 7830457) {
+		// % 10^1 gives 1 digit, % 10^2 gives 2 digits ... % 10^n gives us the last n digits
+		// console.log(`res at ${i} is ${res}`)
+		console.log(`pow at ${i}`)
+		res = (res * 2) % Math.pow(10, 10) 
+		i++
+	}
+	console.log(`last 10 digits for 2 to the ${i} is ${res}`)
+	//multiply last 10 digit result with 28433,
+	res = (res * 28433) % Math.pow(10, 10)
+	//add 1
+	res += 1 //I WLL BE VERY SURPRISED IF ITS 9999999999 + 1
+	//return last 10 digits
+	return res
+}				
+
+
+// console.log(`If I did this correctly, then the last 10 digits of 2^7830457 * 28433 + 1 is ${p97()}`)
 
 
 //Problem 98 - Anagram Squares
@@ -52,13 +82,103 @@ const __dirname = import.meta.dirname
 		// -this is not a constant time check, binary search could have it down in log(n) time, but would reduce storage.
 			// --if we're considering definite storage space, we know theres a definite number of squares containing x digits, call it n, then binary search - log(n) time is a definite time as well ?
 			// --generally prefer using extra storage over extra time
-function p98() {
-	gf.fetchData(__dirname + '/0098_words.txt').then((res) => {
-		console.log(res)
 
+
+
+//A letter cannot have the same digit as another letter, 
+//Can... one letter have two different digits? -While not specified, assuming no single letter can be mapped to two separate digits
+async function p98() {
+	console.log('start')
+	let maxSquare = null
+	function isAnagramPair(baseWord, comparedWord, squareNum, squareExists) {
+		//assign square num to base word, match letters to digits
+			//Track digit to letter, as well as the count. ltg = {letter: {digit: int, count: int}}
+		const letterToDigit = {}
+		const usedDigits = {}
+		const strNum = `${squareNum}`
+
+		for (let i = 0; i < strNum.length; i++) {
+			const digit = strNum[i]
+			const letter = baseWord[i]
+
+			if (letterToDigit[letter] === undefined) {
+				// letterToDigit[letter] = {digit, count: 1}
+				if (usedDigits[digit] !== undefined) {
+					//letter hasn't been associated with digit yet, but digit has been used
+					return false
+				}
+				usedDigits[digit] = true
+				letterToDigit[letter]= {digit}
+			} else {
+				if (letterToDigit[letter][digit] !== digit) {
+					//we got duplicate digit placement that isn't matching duplicate letters 
+					return false
+				}
+				// letterToDigit[letter][count]++
+			}
+		}
+		//we know the two words are anagrams of each other, letters and count we expect to match
+		//As long as the letter to digits line up, we don't have to be concerned about positions 
+		//We just need to check that there are no leading zeroes in our comparedWord 
+
+		//Check for matching letter to digit, 
+		
+		const cDigits = [] 
+		for (let i = 0; i < comparedWord.length; i++) {
+			const letter = comparedWord[i]
+
+			cDigits.push(letterToDigit[letter].digit)
+		}
+
+		//Careful about leading zeroes
+		if (cDigits[0] === 0) {
+				//leading zero, false
+				return false
+		}
+		//Return if its a square or not 
+		return squareExists[cDigits.join('')] !== undefined
+	}
+
+	await gf.fetchData(__dirname + '/0098_words.txt').then((res) => {
 	//Sort the words
 		//Create a table matching word length to sub-tables
-		//sub-table matching initial letter to list containing lists of anagram words
+		const words = res.replace(/["]/g, "").split(',')
+		const wordLengthToWords = {}
+		let maxWordLength = 0
+		//sort the words by wordLength to sub-tables of anagram words
+		for (const word of words) {
+			const wordLength = word.length
+
+			//rearrange and sort letters of a word in alphabetical order to check for matching anagram words
+			const sortedLetters = word.split('').sort().join('')
+			if (wordLengthToWords[wordLength] === undefined) {
+				wordLengthToWords[wordLength] = {}
+				wordLengthToWords[wordLength][sortedLetters] = [word]
+
+				maxWordLength = Math.max(maxWordLength, wordLength)
+			} else {
+				// wordLengthToWords[wordLength].push(word)
+				if (wordLengthToWords[wordLength][sortedLetters] === undefined) {
+					wordLengthToWords[wordLength][sortedLetters] = [word]
+				} else {
+					wordLengthToWords[wordLength][sortedLetters].push(word)
+				}
+			}
+		} 
+
+		//not a single word with >9 letters contains anagram pair(s) 
+		//should be easy and quick work since theres no two words to compare, no need to filter out 
+		// for (let i = 14; i > 9; i--) {
+		// 	console.log(wordLengthToWords[i])
+		// }
+
+		// for (let i = 9; i > 0; i--) {
+		// 	console.log(wordLengthToWords[i])
+		// }
+		//Theres actually not a lot of anagram pairs
+		//Since we're doing a one time step on every list of anagram words, theres no reason to filter out all the lists with only 1 word (and theres a lot of them)
+			//Also what we are doing at each step will be an early exit due to containing only 1 word
+
 
 	//Start with the longest word length for early termination if an answer is found
 	//For words of length x,
@@ -70,11 +190,138 @@ function p98() {
 		//if highest square number of x digit is marked OR (the entire list of length x words are exhausted AND an answer with x digits is found)
 			//we've found our highest square num for the given list of words, return
 
-		
+		let pointer = maxWordLength
+		// pointer = 5
+		while(pointer > -1) {
+
+			//Once we find an answer for a certain amount of x digits, or words of length x
+			//we want to be certain the verified is certainly the max for those x digits/length
+			//Any possible answers with less than x digits will be guranteed to be less
+			// if (maxSquare !== null) {
+			// 	//we've found an answer for the previous wordLength, it should be the max
+			// 	console.log(`The largest square number formed by our anagramic pair is ${maxSquare}`)
+			// 	return
+			// }
+			console.log(`Working with words of length ${pointer}`)
+			const wordLength = pointer
+			let squareNums = [] //squareNums of x digits, sorted GTL
+			let squareNumsCheck = {}
+			// wordLengthToWords[wordLength] gives me a table [key:sortedLetters, value:list [words]]
+			for (const sortedLetters in wordLengthToWords[wordLength]) {
+				const anagramWords = wordLengthToWords[wordLength][sortedLetters]
+
+				let baseIndex = 0
+				let baseWord = anagramWords[baseIndex]
+
+				let currentIndex = baseIndex + 1
+				let currentWord = anagramWords[currentIndex]
+
+				//we use the fact that currentWord will not be undefined with a list containing more than 1 word
+				if (currentWord !== undefined && squareNums.length === 0) {
+					//we actually need to populate our list
+
+					//get the largest square number containing x digit as its square root
+					const min = Math.pow(10, wordLength - 1)
+					const max = Math.pow(10, wordLength) - 1
+					let num = Math.floor(Math.sqrt(max))
+					let squareNum = Math.pow(num, 2)
+
+					while (squareNum >= min) {
+						squareNums.push(squareNum)
+						squareNumsCheck[squareNum] = true
+
+						num--
+						squareNum = Math.pow(num, 2)
+					}
+
+					// console.log(`Populating squareNums for wordLength of ${wordLength}. Square Nums:${squareNums}`)
+					console.log(`Populating squareNums for wordLength of ${wordLength}, we are working with ${squareNums.length} square numbers`)
+					//The anagram check might actually be the most expensive part just dealing with so many square numbers at higher digit counts
+				}
+
+				let squareNumIndex = 0
+				let squareNum = squareNums[squareNumIndex]
+				//base word, we increment base word when all compared words are exhausted with all possible square nums for our base 
+				console.log(`Checking out words from the list containing [${anagramWords}]`)
+				while(baseWord !== undefined) {
+					if (currentWord === undefined) {
+						// console.log('current words exhausted, checking next base word')
+						squareNumIndex++
+						if (squareNumIndex >= squareNums.length) {
+							baseIndex++
+							squareNumIndex = 0
+							// squareNum = squareNum[squareNumIndex]
+
+							// currentIndex = baseIndex + 1
+							// currentWord = anagramWords[currentIndex]
+						} else {
+							// squareNum = squareNums[squareNumIndex]
+							// currentIndex = baseIndex + 1
+							// currentWord = anagramWords[currentIndex]
+						}
+
+						baseWord = anagramWords[baseIndex]
+						squareNum = squareNums[squareNumIndex]
+						currentIndex = baseIndex + 1
+						currentWord = anagramWords[currentIndex]
+						continue;
+					}
+					//compare the two words, check next word
+						//if I were a smarter person I'd use the helper function to return null or the higher value of the two instead of boolean
+					if (isAnagramPair(baseWord, currentWord, squareNum, squareNumsCheck)) {
+						//mark it and make sure its the max of this length x
+						console.log(`We found an anagram pair!!! ${baseWord} with ${currentWord} associating ${squareNum} with ${baseWord} for ${currentWord}`)
+
+						//Since we're not smarter, we check for the higher value between the base and current word
+						console.log(`${squareNum} for ${baseWord} has a square root of ${Math.sqrt(squareNum)}`)
+						console.log(`Assigning the digit to letter relationship`)
+
+						const letterToDigit = {}
+						const strNum = `${squareNum}`
+
+						for (let i = 0; i < baseWord.length; i++) {
+							const digit = strNum[i]
+							const letter = baseWord[i]
+							if (letterToDigit[letter] === undefined) {
+								letterToDigit[letter] = {digit, pos:[i]}
+							} else {
+								letterToDigit[letter].pos.push(i)
+							}
+						}
+
+						const cDigits = []
+						for (let i = 0; i < currentWord.length; i++) {
+							const letter = currentWord[i]
+
+							// const digit = letterToDigit[letter].digit
+							cDigits.push(letterToDigit[letter].digit)
+						}
+						const cNum = Number(cDigits.join(''))
+						console.log(`${currentWord} results in ${cNum}, which has the square root value ${Math.sqrt(cNum)}`)
+						maxSquare = Math.max(maxSquare, squareNum, cNum)
+					} else {
+						//check next word 
+					}
+					// console.log('I don\'t expect to reach this point for pointer > 9')
+					// console.log('I do however expect it at 9')
+					// everything is working nice and dandy....anagramic square check time
+					currentIndex++
+					currentWord = anagramWords[currentIndex]
+				}
+			}
+			pointer--
+		}
+
+
 	})
+
+	console.log(maxSquare)
+	console.log('Done')
 }
 
-p98()
+// p98()
+//I DID ITTTTT :)!!!!!! 
+
 //Problem 99 - Largest exponential
 
 //Given a base number and an exponent, can we easily determine the number of digits easily?
