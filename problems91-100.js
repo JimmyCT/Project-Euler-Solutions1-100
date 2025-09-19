@@ -2,6 +2,66 @@ import gf from './generalFunctions.js'
 
 const __dirname = import.meta.dirname
 
+
+
+//Problem 95 - Amicable Chains
+//Assuming Amicable chains are formed when specifically the last sum of proper divisors points to the very first number in the chain and NOT when a chain (cycle is formed)
+function p95(limit) {
+	const seenNums = new Array(Math.pow(10, 6) + 1).fill(undefined)
+	let longestChainLength = 0
+
+	//0 ... chains to itself? 
+	seenNums[0] = {link: 0}
+	//1 chains to 0
+	//2 chains to 1 
+	let res = null
+	let num = 10000
+	//no element exceeding one million, 1,000,000 should be included
+	while(num <= limit) {
+		if (seenNums[num] !== undefined) {
+			//already been used as part of a longer chain previously, guranteed to be a smaller chain
+			num++
+			continue;
+		}
+
+		let chainNumsSet = new Set()
+		chainNumsSet.add(num)
+		//get properDivisors
+		// console.log(`Proper divsors of ${num} are ${gf.getProperDivisors(num)}`)
+		let sumPDivisors = gf.getProperDivisors(num).reduce((sum, curr) => sum + curr, 0);
+
+		while (!chainNumsSet.has(sumPDivisors) && sumPDivisors <= Math.pow(10, 6)) {
+			// console.log('working with ', sumPDivisors)
+			// //we've formed a chain
+			// //Check length 
+			// if (chainNumsSet.size > longestChainLength) {
+			// 	//find smallest value in the chain
+			// 	longestChainLength = chainNumsSet.size
+			// }
+			chainNumsSet.add(sumPDivisors)
+			// sumPDivisors = gf.getProperDivisors()
+			if (seenNums[sumPDivisors] !== undefined) {
+				sumPDivisors = seenNums[sumPDivisors].link
+			} else {
+				seenNums[sumPDivisors] = {link: gf.getProperDivisors(sumPDivisors).reduce((sum, curr) => sum + curr, 0)}
+				sumPDivisors = seenNums[sumPDivisors].link
+			}
+		}
+		// console.log(`Working with a chain of length ${chainNumsSet.size} containing the values ${[...chainNumsSet]}`)
+		//we've exit the loop, which means a chain has been formed
+		if (chainNumsSet.size > longestChainLength && sumPDivisors <= Math.pow(10, 6)) {
+			res = Math.min(...[...chainNumsSet])
+			longestChainLength = chainNumsSet.size
+
+			console.log(`New longest chain at ${chainNumsSet.size} with the chain containing values ${[...chainNumsSet]}, smallest value at ${res}`)
+		}
+		num++
+	}
+}
+p95(100000)
+// console.log([30,42,54,66,78,90,144,259,45,33,15,9,4,3,1,0])
+// console.log([30,42,54,66,78,90,144,259,45,33,15,9,4,3,1,0].map((val) => gf.getProperDivisors(val).reduce((sum, curr) => sum + curr, 0)))
+// console.log(Math.min(...[30,42,54,66,78,90,144,259,45,33,15,9,4,3,1,0].map((val) => gf.getProperDivisors(val).reduce((sum, curr) => sum + curr, 0))))
 //Problem 97 - Large Non-Mersenne Prime
 
 // (a * b) mod m === (a_r * b_r) mod m where a_r = a mod m and b_r = b mod m
@@ -62,7 +122,7 @@ function p97() {
 	
 }				
 
-console.log(`If I did this correctly, then the last 10 digits of 2^7830457 * 28433 + 1 is ${p97()}`)
+// console.log(`If I did this correctly, then the last 10 digits of 2^7830457 * 28433 + 1 is ${p97()}`)
 
 
 //Problem 98 - Anagram Squares
