@@ -12,26 +12,75 @@ function p97() {
 	//evalulate 2^7830457 sortaaaa, we only really care about the last 10 digits
 		//go through powers of 2 until we have a number with 10 digits
 		//continue but we only care about the last 10 digits
-	let res = 1
-	let i = 0
-	while (i < 7830457) {
-		// % 10^1 gives 1 digit, % 10^2 gives 2 digits ... % 10^n gives us the last n digits
-		// console.log(`res at ${i} is ${res}`)
-		console.log(`pow at ${i}`)
-		res = (res * 2) % Math.pow(10, 10) 
-		i++
+
+	//get first power of 2 that contains just under 11 digits, (still at 10 digits)
+	let num = 2;
+	let pow = 1
+	while (num < Math.pow(10, 10)) {
+		num *= 2
+		pow++
 	}
-	console.log(`last 10 digits for 2 to the ${i} is ${res}`)
-	//multiply last 10 digit result with 28433,
-	res = (res * 28433) % Math.pow(10, 10)
-	//add 1
-	res += 1 //I WLL BE VERY SURPRISED IF ITS 9999999999 + 1
-	//return last 10 digits
-	return res
+
+	//num should be > 10^10, we want 1 step before
+	num /= 2
+	pow--
+
+	//divide 7830457 as evenly as possible
+	//(2 ^ 7830457) mod m === (2 ^ (kn + r)) mod m where r = 7830457 mod n, and k = Math.floor(7830457 / n), n is our pow
+	//(2 ^(kn + r)) mod m =  ((2^n)^k * 2^r) mod m
+		// => (r_n ^k * (2^r mod m)) mod m, where r_n = 2^n mod m
+
+	//modular arithmetic - given two numbers that results in too large of a number
+	//return a mod m value for their product
+
+	// (a * b) mod m = (r_a * r_b) mod m where r_a = (a mod m) and r_b = (b mod m )
+	// = (r_a1 * r_b1) mod m where r_a1 = (r_a mod m) and r_b1 = (r_b mod m)
+
+	// (a * b * c * d) mod m = (r_a * r_b * r_c * r_d) mod m where r_letter = letter % m
+	// = ((r_a * r_b) * (r_c * r_d)) mod m
+	// = (r_ab * r_cd) mod m where r_ab = (r_a * r_b) mod m and r_cd = (r_c * r_d) mod m
+	// function modHelper(m, ...nums) {
+	function modHelper(m, nums) {
+		const modValues = []
+		let tmp = 1
+
+		for (const num of nums) {
+			tmp *= num
+			if (tmp > m) {
+				modValues.push(tmp % m)
+				tmp = 1
+			}
+		}
+		// if (tmp !== 1) {
+		// 	modValues.push(tmp % m)
+		// } else {
+		// 	//tmp would be 1 adding it would be irrelevant to the final "product"
+		// 	if (nums[nums.length -1] === 1) {
+		// 		modValues.push(tmp) // does it even matter to add 1?. ... no
+		// 	}
+		// }
+		modValues.push(tmp % m)
+
+		const product = modValues.reduce((sum, curr) => sum * curr, 1)
+		if (product > Number.MAX_SAFE_INTEGER) {
+			return modHelper(m, modValues)
+		}
+
+		return (product) % m
+	}
+
+	const k = Math.floor(7830457 / pow)
+	const r = 7830457 % pow
+
+	const r_n = Math.pow(2, pow) % Math.pow(10, 10)
+	const twoR = Math.pow(2, r) % Math.pow(10, 10)
+
+	const tmp = modHelper(Math.pow(10, 10), [...new Array(k).fill(r_n), twoR])
+	
+	return modHelper(Math.pow(10, 10), [28433, tmp]) + 1
 }				
 
-
-// console.log(`If I did this correctly, then the last 10 digits of 2^7830457 * 28433 + 1 is ${p97()}`)
+console.log(`If I did this correctly, then the last 10 digits of 2^7830457 * 28433 + 1 is ${p97()}`)
 
 
 //Problem 98 - Anagram Squares
