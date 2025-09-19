@@ -9,27 +9,6 @@ const __dirname = import.meta.dirname
 
 
 function p97() {
-	//evalulate 2^7830457 sortaaaa, we only really care about the last 10 digits
-		//go through powers of 2 until we have a number with 10 digits
-		//continue but we only care about the last 10 digits
-
-	//get first power of 2 that contains just under 11 digits, (still at 10 digits)
-	let num = 2;
-	let pow = 1
-	while (num < Math.pow(10, 10)) {
-		num *= 2
-		pow++
-	}
-
-	//num should be > 10^10, we want 1 step before
-	num /= 2
-	pow--
-
-	//divide 7830457 as evenly as possible
-	//(2 ^ 7830457) mod m === (2 ^ (kn + r)) mod m where r = 7830457 mod n, and k = Math.floor(7830457 / n), n is our pow
-	//(2 ^(kn + r)) mod m =  ((2^n)^k * 2^r) mod m
-		// => (r_n ^k * (2^r mod m)) mod m, where r_n = 2^n mod m
-
 	//modular arithmetic - given two numbers that results in too large of a number
 	//return a mod m value for their product
 
@@ -51,14 +30,6 @@ function p97() {
 				tmp = 1
 			}
 		}
-		// if (tmp !== 1) {
-		// 	modValues.push(tmp % m)
-		// } else {
-		// 	//tmp would be 1 adding it would be irrelevant to the final "product"
-		// 	if (nums[nums.length -1] === 1) {
-		// 		modValues.push(tmp) // does it even matter to add 1?. ... no
-		// 	}
-		// }
 		modValues.push(tmp % m)
 
 		const product = modValues.reduce((sum, curr) => sum * curr, 1)
@@ -69,15 +40,26 @@ function p97() {
 		return (product) % m
 	}
 
-	const k = Math.floor(7830457 / pow)
-	const r = 7830457 % pow
+	let tmp = 1
+	let pow = 0
 
-	const r_n = Math.pow(2, pow) % Math.pow(10, 10)
-	const twoR = Math.pow(2, r) % Math.pow(10, 10)
+	const m = Math.pow(10, 10)
+	let mValues = []
+	while (pow < 7830457) {
+		tmp *= 2
+		pow++
 
-	const tmp = modHelper(Math.pow(10, 10), [...new Array(k).fill(r_n), twoR])
+		if (tmp > m) {
+			mValues.push(tmp % m)
+			tmp = 1
+		}
+	}
+
+	//if tmp were 1, pushing it would be irrelevant to our final "product"
+	// if (tmp !== 1) mValues.push(tmp % m);
+	mValues.push(tmp % m)
+	return modHelper(m, [...mValues, 28433]) + 1
 	
-	return modHelper(Math.pow(10, 10), [28433, tmp]) + 1
 }				
 
 console.log(`If I did this correctly, then the last 10 digits of 2^7830457 * 28433 + 1 is ${p97()}`)
