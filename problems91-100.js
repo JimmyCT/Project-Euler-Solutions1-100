@@ -3,62 +3,178 @@ import gf from './generalFunctions.js'
 const __dirname = import.meta.dirname
 
 
+//Problem 94 - Almost Equilateral Triangles
+
+
+//Personal Notes 
+	//Okay the problem seems simple enough
+
+	//I misread the conditions, integral side lengths and integrral areas, and perimeters that do not exceed 1 billion. The area can exceed one billion
+
+	//Workarounds for stupidly large areas?
+
+	//Looking at our use of Heron's formula
+		//Really we're just trying to see if the square root results in an integer
+			//if it were to be an integer value, then s * (s - a) * (s - b) * (s - c) would need to be a square number
+				//max, a = b =  333,333,333 and c = 333,333,334, s = 1,000,000,000, doing a bit of cheating, area = (s * 3(2/3s)) = 3s
+
+
+	// Looking at our area... where can we find something like... a mirror or symmetry... 
+		//can we have our area to be in the form area = x^2 where x can substitute for some form of Heron's formula
+		//Heron's formula will results in an integer value area 
+			//if the area is a square number
+			//if the area can be expressed as area = x^2, so let x = abc, then area can be expressed in some form (abc)(abc)
+
+	//s = (a + b + c) / 2 => 2s = a + b + c
+		//a = sqrt(x), x = s * (s - a) * (s - b) * (s - c)
+		//	= (s^2 - sa) * (s^2 - sb) * (s^2 - sc)
+		//  = (s^4 - s^3b - s^3a + s^2ab) * (s^2 - sc)
+		//  = s^6 - s^5b - s^5a + s^4ab - s^5c + s^4bc + s^4ac - s^3abc
+		//  = s^6 - s^5(a + b + c) + s^4(ab + bc + ac) - s^3abc
+		//  = s^3 * (s^3 - s^2(a + b + c) + s(ab + bc + ac) - abc)
+		//  = s^3 * (s^3 - 2s^3 + s(ab + bc + ac) - abc)
+		// = s^3 * (-s^3 + s(ab + bc + ac) - abc )
+				//can I prove situations where 2s^3 = s(ab + bc + ac) - abc
+					//?
+					//	substitue s = (a + b +c) / 2 for 
+					//  2s^3 = s(ab + bc + ac) - abc
+					//	2((a + b + c) / 2)^3 = (a + b + c) / 2 * (ab + bc + ac) - abc
+					// => (a + b + c)^3 / 4 = (a + b + c)(ab + bc + ac)/2 - abc
+					// => (a + b + c)^3 = 2(a + b + c)(ab + bc + ac) - 4abc
+					// => (a + b + c)^3 = 2(a^2b + a^2c + abc + ab^2 + b^2c + abc + abc + bc^2 + ac^2) - 4abc
+					// => (a + b + c)^3 = 2(a^2b + a^2c + ab^2 + b^2c + ac^2 + bc^2 + 3abc) - 4abc
+					// => (a + b + c)^3 = 2(a^2b + a^2c + ab^2 + b^2c + ac^2 + bc^2) + 2abc
+					// =>           = 2(a^2b + a^2c + ab^2 + b^2c + ac^2 + bc^2 + abc)
+					// =>           = 2(a^2(b + c) + b^2(a + c) + c^2(a + b) + abc)
+							//(a + b + c)^3 = (a^2 + b^2 + c^2 + 2ab + 2ac + 2bc)(a + b + c)
+							//              = (a^3 + b^3 + c^3 + 2a^2b + 2a^2c + 2ab^2 + 2b^2c + 2ac^2 + 2bc^2 + 6abc)
+							// 							= (a^3 + b^3 + c^3) + 2(a^2b + a^2c +ab^2 + b^2c + ac^2 + bc^2) + 6abc
+
+
+	//might need to somewhere conveniently use the fact that a = b, and c = a +/- 1
+
+	//area = s * (s - a) * (s - b) * (s - c), s = (a + b + c) / 2
+		//case1: a = b, c = a - 1
+			//	area = s * (s - a) (s - a) * (s - a - 1), s = (3a - 1) / 2
+				//let x = s - a, => area = s(x)(x)(x - 1) = s(x^2)(x - 1) = sx^3 - sx^2 = s(s - a)^3 - s(s - a)^2
+			// 	=>  area = ((3a - 1) / 2)((3a - 1) / 2 - a)((3a - 1) / 2 - a)((3a - 1) / 2 - a - 1)
+
+
+		// (s^2 - sa)^2 * (s^2 - sa - s)
+		// => (s^2 - sa)^3 - s(s^2 - sa)^2	
+		//case2: a = b, c = a + 1
+function p94() {
+	let res = '0'
+	//Heron's Formula for Area of a triangle
+	function getArea(a, b, c) {
+		const s = (a + b + c) / 2
+		return Math.sqrt(s * (s - a) * (s - b) * (s - c))
+	}
+
+	//v2 gets a little high, leads to precision errors, irrelevant for an integer check tho
+	function v2(a,b,c) {
+		return Math.sqrt(-(Math.pow(a, 4)) - Math.pow(b, 4) - Math.pow(c, 4) + (2 * Math.pow(a,2) * Math.pow(b, 2)) + (2 * Math.pow(a,2) * Math.pow(c,2)) + (2 * Math.pow(b, 2) * Math.pow(c, 2))) / 4
+	}
+	//Perimeter AND Area of "almost-equilateral" triangles up for consideration will not exceed 1 billion
+	//two sides are the same, the third differ by 1, +/- 1
+
+	//quick check at 1 1 2 since 1 1 0 is impossible
+	// console.log(getArea(1,1,2)) results in an area of 0... Do we include Degenerate Triangles????????????
+		//Might vary the answer here, include first, exclude later
+		res = gf.strSum(res, '4') // 1 1 2 results in a degenerate triangle, 0 is still an integer
+
+	//loop at 2 2 1, 2 2 3 until either perimeter OR area exceeds one billion, in which case we've exhausted all of our options	
+	let i = 2
+	let lowerArea = getArea(i, i, i - 1)
+	let lowerPerimeter = i + i + i - 1
+	let upperArea =  getArea(i, i, i + 1)
+	let upperPerimeter = i + i + i + 1
+
+	let tmp = 1
+	while (lowerPerimeter <= Math.pow(10, 9)) {
+		if (i > Math.pow(10, tmp)) {
+			console.log(`Checking values greater than ${Math.pow(10, tmp)}`)
+			tmp++
+		}
+		if (i === 333333333) {
+			console.log('YO IT SHOULD STOP AFTER THIS')
+		}
+		if (i === 333333334) {
+			console.log('WTF')
+		}
+		if (Number.isInteger(lowerArea)) {
+			// res += i + i + i - 1
+			// console.log(`Almost Equilateral triangle with sides ${i} and ${i - 1} results in an integer area of ${lowerArea}`)
+			// res += 3 * i - 1
+			res = gf.strSum(res, `${lowerPerimeter}`)
+			// console.log(`current sum is at ${res}`)
+		}
+
+		if (Number.isInteger(upperArea)) {
+			// console.log(`Almost Equilateral triangle with sides ${i} and ${i + 1} results in an integer area of ${upperArea}`)
+			// res += 3 * i + 1
+			res = gf.strSum(res, `${upperPerimeter}`)
+			// console.log(`current sum is at ${res}`)
+		}
+
+		i++
+		lowerArea = getArea(i, i, i - 1)
+		upperArea =  getArea(i, i, i + 1)
+		lowerPerimeter = i + i + i - 1
+		upperPerimeter = i + i + i + 1
+	}
+
+	return res
+}
+
+console.log(p94())
+
 
 //Problem 95 - Amicable Chains
 //Assuming Amicable chains are formed when specifically the last sum of proper divisors points to the very first number in the chain and NOT when a chain (cycle is formed)
 function p95(limit) {
-	const seenNums = new Array(Math.pow(10, 6) + 1).fill(undefined)
+	const seenNums = new Array(Math.pow(10, 6) + 1).fill(null)
 	let longestChainLength = 0
 
-	//0 ... chains to itself? 
-	seenNums[0] = {link: 0}
+	//0 ... chains to itself? undefined ???
+	seenNums[0] = undefined
 	//1 chains to 0
 	//2 chains to 1 
 	let res = null
-	let num = 10000
+	let num = 1
 	//no element exceeding one million, 1,000,000 should be included
 	while(num <= limit) {
-		if (seenNums[num] !== undefined) {
-			//already been used as part of a longer chain previously, guranteed to be a smaller chain
-			num++
-			continue;
-		}
-
 		let chainNumsSet = new Set()
+		const startVal = num
 		chainNumsSet.add(num)
-		//get properDivisors
-		// console.log(`Proper divsors of ${num} are ${gf.getProperDivisors(num)}`)
 		let sumPDivisors = gf.getProperDivisors(num).reduce((sum, curr) => sum + curr, 0);
 
 		while (!chainNumsSet.has(sumPDivisors) && sumPDivisors <= Math.pow(10, 6)) {
-			// console.log('working with ', sumPDivisors)
-			// //we've formed a chain
-			// //Check length 
-			// if (chainNumsSet.size > longestChainLength) {
-			// 	//find smallest value in the chain
-			// 	longestChainLength = chainNumsSet.size
-			// }
 			chainNumsSet.add(sumPDivisors)
-			// sumPDivisors = gf.getProperDivisors()
-			if (seenNums[sumPDivisors] !== undefined) {
-				sumPDivisors = seenNums[sumPDivisors].link
+			if (seenNums[sumPDivisors] !== null) {
+				sumPDivisors = seenNums[sumPDivisors]
 			} else {
-				seenNums[sumPDivisors] = {link: gf.getProperDivisors(sumPDivisors).reduce((sum, curr) => sum + curr, 0)}
-				sumPDivisors = seenNums[sumPDivisors].link
+				seenNums[sumPDivisors] = gf.getProperDivisors(sumPDivisors).reduce((sum, curr) => sum + curr, 0)
+				sumPDivisors = seenNums[sumPDivisors]
 			}
 		}
-		// console.log(`Working with a chain of length ${chainNumsSet.size} containing the values ${[...chainNumsSet]}`)
 		//we've exit the loop, which means a chain has been formed
-		if (chainNumsSet.size > longestChainLength && sumPDivisors <= Math.pow(10, 6)) {
-			res = Math.min(...[...chainNumsSet])
-			longestChainLength = chainNumsSet.size
+		//Check to see if the chain (cycle) loops to the start or somewhere in the middle
+		if (sumPDivisors <= Math.pow(10,6) && sumPDivisors === startVal) {
+			if (chainNumsSet.size > longestChainLength) {
+				res = Math.min(...[...chainNumsSet])
+				longestChainLength = chainNumsSet.size
 
-			console.log(`New longest chain at ${chainNumsSet.size} with the chain containing values ${[...chainNumsSet]}, smallest value at ${res}`)
+				console.log(`New Longest chain at ${longestChainLength} with the chain containing values ${[...chainNumsSet]}, smallest value ${res}, start of chain was ${startVal}`)
+			}
 		}
+	
 		num++
 	}
+
+	return res
 }
-p95(100000)
+// console.log(p95(1000000))
 // console.log([30,42,54,66,78,90,144,259,45,33,15,9,4,3,1,0])
 // console.log([30,42,54,66,78,90,144,259,45,33,15,9,4,3,1,0].map((val) => gf.getProperDivisors(val).reduce((sum, curr) => sum + curr, 0)))
 // console.log(Math.min(...[30,42,54,66,78,90,144,259,45,33,15,9,4,3,1,0].map((val) => gf.getProperDivisors(val).reduce((sum, curr) => sum + curr, 0))))

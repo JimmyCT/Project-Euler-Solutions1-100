@@ -576,4 +576,4 @@ for (let i = 0; i < 200; i++) {
 
 */
 // module.exports = {strSum, strMultiplication, strPow, getPrimes, getPrimeBools, getPrimeData, expandPrimes, fetchData, nextPermutationNums}
-export default {strSum, strMultiplication, strPow, getPrimes, getPrimeBools, getPrimeData, expandPrimes, fetchData, nextPermutationNums, treeify, compareStrNums, primeFactorization}
+export default {strSum, strMultiplication, strPow, getPrimes, getPrimeBools, getPrimeData, getProperDivisors, expandPrimes, fetchData, nextPermutationNums, treeify, compareStrNums, primeFactorization}
