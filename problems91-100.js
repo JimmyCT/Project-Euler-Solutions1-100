@@ -7,10 +7,6 @@ const __dirname = import.meta.dirname
 
 
 //Personal Notes 
-	//Okay the problem seems simple enough
-
-	//I misread the conditions, integral side lengths and integrral areas, and perimeters that do not exceed 1 billion. The area can exceed one billion
-
 	//Workarounds for stupidly large areas?
 
 	//Looking at our use of Heron's formula
@@ -25,45 +21,53 @@ const __dirname = import.meta.dirname
 			//if the area is a square number
 			//if the area can be expressed as area = x^2, so let x = abc, then area can be expressed in some form (abc)(abc)
 
-	//s = (a + b + c) / 2 => 2s = a + b + c
-		//a = sqrt(x), x = s * (s - a) * (s - b) * (s - c)
-		//	= (s^2 - sa) * (s^2 - sb) * (s^2 - sc)
-		//  = (s^4 - s^3b - s^3a + s^2ab) * (s^2 - sc)
-		//  = s^6 - s^5b - s^5a + s^4ab - s^5c + s^4bc + s^4ac - s^3abc
-		//  = s^6 - s^5(a + b + c) + s^4(ab + bc + ac) - s^3abc
-		//  = s^3 * (s^3 - s^2(a + b + c) + s(ab + bc + ac) - abc)
-		//  = s^3 * (s^3 - 2s^3 + s(ab + bc + ac) - abc)
-		// = s^3 * (-s^3 + s(ab + bc + ac) - abc )
-				//can I prove situations where 2s^3 = s(ab + bc + ac) - abc
-					//?
-					//	substitue s = (a + b +c) / 2 for 
-					//  2s^3 = s(ab + bc + ac) - abc
-					//	2((a + b + c) / 2)^3 = (a + b + c) / 2 * (ab + bc + ac) - abc
-					// => (a + b + c)^3 / 4 = (a + b + c)(ab + bc + ac)/2 - abc
-					// => (a + b + c)^3 = 2(a + b + c)(ab + bc + ac) - 4abc
-					// => (a + b + c)^3 = 2(a^2b + a^2c + abc + ab^2 + b^2c + abc + abc + bc^2 + ac^2) - 4abc
-					// => (a + b + c)^3 = 2(a^2b + a^2c + ab^2 + b^2c + ac^2 + bc^2 + 3abc) - 4abc
-					// => (a + b + c)^3 = 2(a^2b + a^2c + ab^2 + b^2c + ac^2 + bc^2) + 2abc
-					// =>           = 2(a^2b + a^2c + ab^2 + b^2c + ac^2 + bc^2 + abc)
-					// =>           = 2(a^2(b + c) + b^2(a + c) + c^2(a + b) + abc)
-							//(a + b + c)^3 = (a^2 + b^2 + c^2 + 2ab + 2ac + 2bc)(a + b + c)
-							//              = (a^3 + b^3 + c^3 + 2a^2b + 2a^2c + 2ab^2 + 2b^2c + 2ac^2 + 2bc^2 + 6abc)
-							// 							= (a^3 + b^3 + c^3) + 2(a^2b + a^2c +ab^2 + b^2c + ac^2 + bc^2) + 6abc
 
+//Okay the idea here is that we have 3 sides with lengths a,b,c and we know a = b
+//We have two cases
+	//case 1: c = a - 1
+	//case 2: c = a + 1
+//Heron's formula provides that 
+	//Area = sqrt(s * (s - a) * (s - b) * (s - c))
+		// s = (a + b + c) / 2, since values a,b,c are integers and a = b, s is an integer ONLY if c is an even
+	//considering we know a = b, => Area = sqrt(s * (s - a)^2 * (s - c))
+	//													 => Area = (s - a) * sqrt(s * (s - c))
+	//													 => Area = ((a + b + c - 2a) / 2) * sqrt((a + b  + c) / 2 * ((a + b + c - 2c) / 2))
+	//													 => Area = (b + c - a / 2) * sqrt((a + b + c) * (a + b - c) / 4)
+	//													 => Area = (b + c - a / 4) * sqrt((a + b + c) (a + b - c))
+	// since a = b 							 => Area = (c / 4) * sqrt((2a + c) * (2a - c))
+	// 													 => Area = (c / 4) * sqrt(4a^2 - c^2) // we don't want to have to take the square of 333,333,333 .... 
+	// instead, 								 => Area = sqrt((2a + c) * (2a - c) * (c / 4)^2)
+	//													 =>      = sqrt('                 ' * c^2 / 16)
+	//case: c = a - 1						 => 		 = sqrt(2a + (a - 1)) * (2a - (a - 1)) * (c / 4)^2) 
+	//     															 = sqrt((3a - 1) * (a + 1) * c^2 / 16)
+	//													 => 		 = sqrt((3a^2 + 2a - 1) * c^2 / 16)
+		//let pf(n) = the prime factorization of num n
+		//use pf(2a + c), pf(2a - c), and pf(c) where pf(c^2) is just double the power count of pf(c)
+			//substituting case 1: c = a - 1 || case 2: c = a + 1;
+			// 	case1: 
+				// => pf(2a - c) = pf(2a - (a - 1)) = pf(a + 1) = pf(c)
+			// case2:
+				// => pf(2a - c) = pf(2a - (a + 1)) = pf (a - 1) = pf(c)
+			//NEVERMIND I'M DUMB
+		//sum the powers of each prime in pf(2a + c), pf(2a - c) and pf(c^2)
+			//bare minimum needs to have at least 4 for the power of 2 to negate the '/16'
+			//an even count for powers of individual prime means the sqrt will cut the powers of each prime by half, still results in a guranteed integer (which is all we care about)
+				// what about primes with an odd count? does 2^(odd number / 2) ever result in an integer?
+						//We know 2^6 / 2 = 64 / 2 = 32, but that is an even number, what about something like prime^(odd num/ 2)?
+						//OKAY: So, lets say we have a prime number, now we square it, we get prime^2. LOGICALLY, a prime number squared should not be divisible by any other number other than the prime itself
+						//			prime^oddNum = (odd count of primes) * itself => can't be divisble by any even powers of the prime number, the powers of a prime can only be divisble by that prime value itself, any other prime value results in a fraction since division of two primes never result in a whole number
 
-	//might need to somewhere conveniently use the fact that a = b, and c = a +/- 1
+							//MY CONJECTURE: cause i'm too lazy to prove, 2 individual primes can not be multiplied together to form a number that, represented as set of primes, contain different prime values
+								//Futhur, two composite numbers or even a prime multiplied by a composite can not result in a number, represented as a set of primes, contain different prime values (and count) from the original two values
 
-	//area = s * (s - a) * (s - b) * (s - c), s = (a + b + c) / 2
-		//case1: a = b, c = a - 1
-			//	area = s * (s - a) (s - a) * (s - a - 1), s = (3a - 1) / 2
-				//let x = s - a, => area = s(x)(x)(x - 1) = s(x^2)(x - 1) = sx^3 - sx^2 = s(s - a)^3 - s(s - a)^2
-			// 	=>  area = ((3a - 1) / 2)((3a - 1) / 2 - a)((3a - 1) / 2 - a)((3a - 1) / 2 - a - 1)
+	
 
+//Reduce work: gf.primeFactorization multiple calls is causing a lot of repetiive work in getting prime data
+	//put prime data into the p94 function and have a prime factorization helper that pulls from that data instead, should reduce a lot of extra work
 
-		// (s^2 - sa)^2 * (s^2 - sa - s)
-		// => (s^2 - sa)^3 - s(s^2 - sa)^2	
-		//case2: a = b, c = a + 1
-function p94() {
+//Given a perimeter limit,
+//Return the sum of areas that fit the question criteria of integral side lengths and integral area for "almost-equilateral" triangles
+function p94(limit) {
 	let res = '0'
 	//Heron's Formula for Area of a triangle
 	function getArea(a, b, c) {
@@ -81,53 +85,289 @@ function p94() {
 	//quick check at 1 1 2 since 1 1 0 is impossible
 	// console.log(getArea(1,1,2)) results in an area of 0... Do we include Degenerate Triangles????????????
 		//Might vary the answer here, include first, exclude later
-		res = gf.strSum(res, '4') // 1 1 2 results in a degenerate triangle, 0 is still an integer
-
+	res = gf.strSum(res, '4') // 1 1 2 results in a degenerate triangle, 0 is still an integer
+	console.log('adding 4 from 1 1 2 triangle, note to potentially exclude')
 	//loop at 2 2 1, 2 2 3 until either perimeter OR area exceeds one billion, in which case we've exhausted all of our options	
+
+	// Sieve of Eratosthenes
+	// Given a positive integer n, 
+	// //return a list of primes less than or equal to n
+	function getPrimes(n) {
+		const primes = []
+		console.log(Math.floor(n + 1))
+		const isPrimeBools = new Array(Math.floor(n + 1)).fill(true)
+
+		// res[0] = undefined 
+		// res[1] = undefined
+
+		let i = 2
+		while(i <= n) {
+			if (isPrimeBools[i]) {
+				//value i is prime
+				primes.push(i)
+				//mark multiples of i that is less than <= n
+				let k = 2
+				let prod = k * i
+				while (prod <= n) {
+					isPrimeBools[prod] = false
+					k++
+					prod = k * i
+				}
+			} else {
+				//previously been marked, multiples will also have been marked, can just move on
+			}
+			i++
+		}
+
+		return primes
+	}
+
+	
+
+	// Considering we're looking at values up to 1 billion,
+	//the largest prime number we need to use to check for prime factorization is <= sqrt(1,000,000,000)
+		//if pf(num) results in an empty table for num > sqrt(1,000,000,000), we expect the number itself to be prime
+
+	// const {primes} = gf.getPrimeData(Math.pow(10, 9) + 1)
+	const primes = getPrimes(Math.sqrt(Math.pow(10, 9)))
+
+	function pfHelper(n, primes) {
+		// console.log(`Working on the pf of ${n}`)
+		const res = {}
+
+		if (n < 2) return res;
+
+
+		let num = n
+		let primeIndex = 0
+		let primeNum = primes[primeIndex]
+		while (num > 1) {
+			// console.log(`considering value prime number${primeNum} in our factorization`)
+			if (num % primeNum === 0) {
+				let pow = 0
+				while (num % primeNum === 0 && num >= primeNum) {
+					pow++
+					num = num / primeNum
+				}
+				res[primeNum] = pow
+			}
+			primeIndex++
+			primeNum = primes[primeIndex]
+
+			//Personal line of code catered towards the problem, we expect that once our list of primes are exhausted, we've reached a range where we trust the number we're looking at is itself, a prime value
+			if (primeNum === undefined) {
+				res[num] = 1
+				break;
+			}
+		}
+
+		return res
+	} 
+
+
 	let i = 2
-	let lowerArea = getArea(i, i, i - 1)
-	let lowerPerimeter = i + i + i - 1
-	let upperArea =  getArea(i, i, i + 1)
-	let upperPerimeter = i + i + i + 1
+	const memoPF = {}
+	//our limit is perimeter <= 1,000,000,000, a + b + c <= Math.pow(10, 9) a = b, c = a +/- 1
+		//=> a and c are close enough that we can cheat and say a = c
+		//=> a <= limit / 3
+	while (i <= Math.floor(limit / 3)) {
+		// console.log(`Working out value a=${i}`)
+		//sum the powers of each prime in pf(2a + c), pf(2a - c) and pf(c^2)
+		//reduce 4 from power of 2, if less than 4, might want to verify
+		//if we have an even (power) count for each prime, power count summed between the 3,
+			//we expect an integer result
+		let pf1, pf2, pf3, c
+		let pf = {}
 
-	let tmp = 1
-	while (lowerPerimeter <= Math.pow(10, 9)) {
-		if (i > Math.pow(10, tmp)) {
-			console.log(`Checking values greater than ${Math.pow(10, tmp)}`)
-			tmp++
+		function helper(pf, subPf) {
+			for (const prime in subPf) {
+				if (pf[prime] === undefined) {
+					pf[prime] = subPf[prime]
+				} else {
+					pf[prime] += subPf[prime]
+				}
+			}
 		}
-		if (i === 333333333) {
-			console.log('YO IT SHOULD STOP AFTER THIS')
-		}
-		if (i === 333333334) {
-			console.log('WTF')
-		}
-		if (Number.isInteger(lowerArea)) {
-			// res += i + i + i - 1
-			// console.log(`Almost Equilateral triangle with sides ${i} and ${i - 1} results in an integer area of ${lowerArea}`)
-			// res += 3 * i - 1
-			res = gf.strSum(res, `${lowerPerimeter}`)
-			// console.log(`current sum is at ${res}`)
+		// a = b
+		//case 1: c = a - 1
+		c = i - 1
+		// pf1 = pfHelper(2*i + c, primes)
+		// pf2 = pfHelper(2*i - c, primes)
+		// pf3 = pfHelper(c, primes) //we know pf(c^2) is just an even count of pf(c) we can generally ignore this unless we need to 2^4 from pf(c^2) to negate the "/16"
+
+		if (memoPF[2 * i + c] !== undefined) {
+			pf1 = memoPF[2 * i + c]
+		} else {
+			pf1 = pfHelper(2*i + c, primes)
+			memoPF[2 * i + c] = pf1
+			// console.log(Object.keys(memoPF).length)
 		}
 
-		if (Number.isInteger(upperArea)) {
-			// console.log(`Almost Equilateral triangle with sides ${i} and ${i + 1} results in an integer area of ${upperArea}`)
-			// res += 3 * i + 1
-			res = gf.strSum(res, `${upperPerimeter}`)
-			// console.log(`current sum is at ${res}`)
+		if (memoPF[2 * i - c] !== undefined) {
+			pf2 = memoPF[2 * i - c]
+		} else {
+			pf2 = pfHelper(2 * i - c, primes);
+			memoPF[2 * i - c] = pf2
+			// console.log(Object.keys(memoPF).length)
 		}
 
+		if (memoPF[c] !== undefined) {
+			pf3 = memoPF[c]
+		} else {
+			pf3 = pfHelper(c, primes)
+			memoPF[c] = pf3
+			// console.log(Object.keys(memoPF).length)
+		}
+		//moves prime values over to pf if they don't already exisit, if exist, sum
+		// console.log(`prime values of pf1=${2*i + c} are, `, pf1)
+		// helper(pf, pf1)
+		// console.log(`pf should look just like pf1, `, pf)
+		// console.log(`prime values of pf2=${2*i - c} are, `, pf2)
+		// helper(pf, pf2)
+		// console.log(`Multiplying 1 and 2, we get a pf of `, pf)
+		helper(pf, pf1)
+		helper(pf, pf2)
+		helper(pf, pf3)
+		helper(pf, pf3)
+
+		// for (const prime in pf2) {
+		// 	if (pf1[prime] === undefined) {
+		// 		pf1[prime] = 3 * pf2[prime]
+		// 	} else {
+		// 		pf1[prime] += 3 * pf2[prime]
+		// 	}
+		// }
+
+		//Check for even count
+		let isInt = true
+		for (const prime in pf) {
+			if (pf[prime] % 2 !== 0) {
+				// console.log('lower', i, `odd count for ${prime} in `, pf)
+				isInt = false
+				break;
+			}
+		}
+
+		// for (const prime in pf1) {
+		// 	if (pf1[prime] % 2 !== 0) {
+		// 		// console.log('lower', i, `odd count for ${prime} in `, pf)
+		// 		isInt = false
+		// 		break;
+		// 	}
+		// }
+
+		if (isInt) {
+			//add perimeter
+			console.log(`a = b =${i} and c = ${c} results in an integer area, adding ${i + i + c} to ${res}`)
+			res = gf.strSum(res, `${2 * i + c}`)
+		}
+		//case 2: c = a + 1
+		c = i + 1
+		pf = {}
+		// pf1 = pfHelper(2*i + c, primes)
+		// pf2 = pfHelper(2*i - c, primes)
+		// pf3 = pfHelper(c, primes)
+
+
+		if (memoPF[2 * i + c] !== undefined) {
+			pf1 = memoPF[2 * i + c]
+		} else {
+			pf1 = pfHelper(2*i + c, primes)
+			memoPF[2 * i + c] = pf1
+			// console.log(Object.keys(memoPF).length)
+		}
+
+		if (memoPF[2 * i - c] !== undefined) {
+			pf2 = memoPF[2 * i - c]
+		} else {
+			pf2 = pfHelper(2 * i - c, primes);
+			memoPF[2 * i - c] = pf2
+			// console.log(Object.keys(memoPF).length)
+		}
+
+		if (memoPF[c] !== undefined) {
+			pf3 = memoPF[c]
+		} else {
+			pf3 = pfHelper(c, primes)
+			memoPF[c] = pf3
+			// console.log(Object.keys(memoPF).length) 
+		}
+
+		console.log(Object.keys(memoPF).length) 
+		if (Object.keys(memoPF).length > Math.pow(10, 5)) {
+			return;
+		}
+		helper(pf, pf1)
+		helper(pf, pf2)
+		helper(pf, pf3)
+		helper(pf, pf3)
+
+		// pf1 = pfHelper(2 * i + c, primes)
+		// pf2 = pfHelper(c, primes)
+
+		// for (const prime in pf2) {
+		// 	if (pf1[prime] === undefined) {
+		// 		pf1[prime] = 3 * pf2[prime]
+		// 	} else {
+		// 		pf1[prime] += 3 * pf2[prime]
+		// 	}
+		// }
+		isInt = true
+		for (const prime in pf) {
+			if (pf[prime] % 2 !== 0) {
+				// console.log('upper',i, `odd count for ${prime} in `, pf)
+				isInt = false
+				break;
+			}
+		}
+
+		// for (const prime in pf1) {
+		// 	if (pf1[prime] % 2 !== 0) {
+		// 		// console.log('lower', i, `odd count for ${prime} in `, pf)
+		// 		isInt = false
+		// 		break;
+		// 	}
+		// }
+
+		if (isInt) {
+			console.log(`a = b =${i} and c = ${c} results in an integer area, adding ${i + i + c} to ${res}`)
+			res = gf.strSum(res, `${2 * i + c}`)
+		}
 		i++
-		lowerArea = getArea(i, i, i - 1)
-		upperArea =  getArea(i, i, i + 1)
-		lowerPerimeter = i + i + i - 1
-		upperPerimeter = i + i + i + 1
 	}
 
 	return res
 }
+//1034530 1034529
+// const a1 = 1034530
+// const c1 = 1034529
+// const s1 = (2 * a1 + c1) / 2
+// const area1 = (s1 - a1) * Math.sqrt(s1 * (s1 - c1))
+// // console.log('1', s1 * (s1 - c1), s1 - a1, Math.sqrt(s1 * (s1 - c1)), (s1 - a1) * Math.sqrt(s1 * (s1 - c1)))
+// console.log("1", (Math.sqrt((a1 + a1 + c1) * (a1 + a1 - c1))) * (a1 + c1 - a1) / 4)
+// // console.log(area1 < Math.pow(10,12))
+// // console.log(s1, area1)
+// //1052562 1052561
+// const a2 = 1052562
+// const c2 = 1052561
+// const s2 = (2 * a2 + c2) / 2
+// const area2 = (s2 - a2) * Math.sqrt(s2 * (s2 - c2))
+// //1062162 1062163
+// const a3 = 1062162
+// const c3 = 1062163
+// const s3 = (2 * a3 + c3) / 2
+// const area3 = (s3 - a3) * Math.sqrt(s3 * (s3 - c3))
 
-console.log(p94())
+// our cap for calculating is Math.pow(10, 15), any area greater or equal to 10^15 is unreliable
+// console.log(`${Number.MAX_SAFE_INTEGER}`.length)
+// console.log(`${Math.pow(10,15) * Math.pow(10, 5)}`.length)
+// console.log(Number.MAX_SAFE_INTEGER - .5, Number.isInteger(Number.MAX_SAFE_INTEGER - .5))
+// console.log(Math.floor(Number.MAX_SAFE_INTEGER  / 10), Number.isInteger(Math.floor(Number.MAX_SAFE_INTEGER  / 10) - .5))
+// console.log(Number.isInteger(Number.MAX_SAFE_INTEGER * Math.pow(10, 10) + .5))
+// console.log(p94())
+
+// console.log(p94(Math.pow(10, 9)))
+// p94(Math.pow(10, 9))
 
 
 //Problem 95 - Amicable Chains
@@ -160,7 +400,7 @@ function p95(limit) {
 		}
 		//we've exit the loop, which means a chain has been formed
 		//Check to see if the chain (cycle) loops to the start or somewhere in the middle
-		if (sumPDivisors <= Math.pow(10,6) && sumPDivisors === startVal) {
+		if (sumPDivisors === startVal) {
 			if (chainNumsSet.size > longestChainLength) {
 				res = Math.min(...[...chainNumsSet])
 				longestChainLength = chainNumsSet.size
@@ -174,7 +414,9 @@ function p95(limit) {
 
 	return res
 }
+// console.time('p95')
 // console.log(p95(1000000))
+// console.timeEnd('p95')
 // console.log([30,42,54,66,78,90,144,259,45,33,15,9,4,3,1,0])
 // console.log([30,42,54,66,78,90,144,259,45,33,15,9,4,3,1,0].map((val) => gf.getProperDivisors(val).reduce((sum, curr) => sum + curr, 0)))
 // console.log(Math.min(...[30,42,54,66,78,90,144,259,45,33,15,9,4,3,1,0].map((val) => gf.getProperDivisors(val).reduce((sum, curr) => sum + curr, 0))))
@@ -224,7 +466,7 @@ function p97() {
 	while (pow < 7830457) {
 		tmp *= 2
 		pow++
-
+		// console.log(pow)
 		if (tmp > m) {
 			mValues.push(tmp % m)
 			tmp = 1
@@ -238,8 +480,9 @@ function p97() {
 	
 }				
 
+// console.time('p97')
 // console.log(`If I did this correctly, then the last 10 digits of 2^7830457 * 28433 + 1 is ${p97()}`)
-
+// console.timeEnd('p97')
 
 //Problem 98 - Anagram Squares
 
@@ -295,7 +538,6 @@ function p97() {
 //A letter cannot have the same digit as another letter, 
 //Can... one letter have two different digits? -While not specified, assuming no single letter can be mapped to two separate digits
 async function p98() {
-	console.log('start')
 	let maxSquare = null
 	function isAnagramPair(baseWord, comparedWord, squareNum, squareExists) {
 		//assign square num to base word, match letters to digits
@@ -441,15 +683,14 @@ async function p98() {
 						squareNum = Math.pow(num, 2)
 					}
 
-					// console.log(`Populating squareNums for wordLength of ${wordLength}. Square Nums:${squareNums}`)
-					console.log(`Populating squareNums for wordLength of ${wordLength}, we are working with ${squareNums.length} square numbers`)
+					// console.log(`Populating squareNums for wordLength of ${wordLength}, we are working with ${squareNums.length} square numbers`)
 					//The anagram check might actually be the most expensive part just dealing with so many square numbers at higher digit counts
 				}
 
 				let squareNumIndex = 0
 				let squareNum = squareNums[squareNumIndex]
 				//base word, we increment base word when all compared words are exhausted with all possible square nums for our base 
-				console.log(`Checking out words from the list containing [${anagramWords}]`)
+				// console.log(`Checking out words from the list containing [${anagramWords}]`)
 				while(baseWord !== undefined) {
 					if (currentWord === undefined) {
 						// console.log('current words exhausted, checking next base word')
@@ -457,14 +698,6 @@ async function p98() {
 						if (squareNumIndex >= squareNums.length) {
 							baseIndex++
 							squareNumIndex = 0
-							// squareNum = squareNum[squareNumIndex]
-
-							// currentIndex = baseIndex + 1
-							// currentWord = anagramWords[currentIndex]
-						} else {
-							// squareNum = squareNums[squareNumIndex]
-							// currentIndex = baseIndex + 1
-							// currentWord = anagramWords[currentIndex]
 						}
 
 						baseWord = anagramWords[baseIndex]
@@ -477,11 +710,13 @@ async function p98() {
 						//if I were a smarter person I'd use the helper function to return null or the higher value of the two instead of boolean
 					if (isAnagramPair(baseWord, currentWord, squareNum, squareNumsCheck)) {
 						//mark it and make sure its the max of this length x
-						console.log(`We found an anagram pair!!! ${baseWord} with ${currentWord} associating ${squareNum} with ${baseWord} for ${currentWord}`)
+
+						// console.log(`We found an anagram pair!!! ${baseWord} with ${currentWord} associating ${squareNum} with ${baseWord} for ${currentWord}`)
 
 						//Since we're not smarter, we check for the higher value between the base and current word
-						console.log(`${squareNum} for ${baseWord} has a square root of ${Math.sqrt(squareNum)}`)
-						console.log(`Assigning the digit to letter relationship`)
+
+						// console.log(`${squareNum} for ${baseWord} has a square root of ${Math.sqrt(squareNum)}`)
+						// console.log(`Assigning the digit to letter relationship`)
 
 						const letterToDigit = {}
 						const strNum = `${squareNum}`
@@ -500,11 +735,10 @@ async function p98() {
 						for (let i = 0; i < currentWord.length; i++) {
 							const letter = currentWord[i]
 
-							// const digit = letterToDigit[letter].digit
 							cDigits.push(letterToDigit[letter].digit)
 						}
 						const cNum = Number(cDigits.join(''))
-						console.log(`${currentWord} results in ${cNum}, which has the square root value ${Math.sqrt(cNum)}`)
+						// console.log(`${currentWord} results in ${cNum}, which has the square root value ${Math.sqrt(cNum)}`)
 						maxSquare = Math.max(maxSquare, squareNum, cNum)
 					} else {
 						//check next word 
@@ -521,12 +755,14 @@ async function p98() {
 
 
 	})
-
-	console.log(maxSquare)
-	console.log('Done')
+	return maxSquare
 }
 
-// p98()
+// console.time('p98')
+// p98().then((res) => {
+// 	console.log(`Max square is ${res}`)
+// 	console.timeEnd('p98')
+// })
 //I DID ITTTTT :)!!!!!! 
 
 //Problem 99 - Largest exponential
@@ -567,6 +803,7 @@ function p99() {
 
 //Problem 100 - Arranged Probability 
 
+
 // Lets say we're working a value z, that is the sum of x = blue discs and y = red discs. z = x + y
 // if we were to represent z and z - 1 as a product of primes
 	//is there a value x such that x and x - 1 as a product of primes matches z and z - 1, with one less 2 involved - meaning the ratio of x * (x - 1) with z * (z - 1) would be 1:2 => 1/2
@@ -583,6 +820,14 @@ function p99() {
 							//in other words, sqrt(x') results in some value x'' that is not an integer, floor(x'') and ceil(x'') results in a value x and x - 1 that potentially results in x'
 			//The issue: for obscenely large values z, even if we were to reduce z * z- 1 by 2 to get z', z' would still be a ridiculously high value like... ~10^23 ,
 				//let z' -
+console.time('test')
+for (let i = 0; i < Math.pow(10, 4); i++) {
+	// const num = Math.pow(10, 12) - Math.floor(Math.random() * Math.pow(10, 12))
+	const num = Math.pow(10, 12) - i
+	console.log(num)
+	console.log(gf.primeFactorization(num))
+}
+console.timeEnd('test')
 function p100(z) {
 	//assume a value z,
 	const pf1 = gf.primeFactorization(z)
@@ -607,8 +852,7 @@ function p100(z) {
 // }
 // console.log(Math.sqrt(7140))
 
-
-
+//
 // let z = Math.pow(10, 12) + Math.pow(10, 6)
 // console.log(Math.sqrt(z * (z - 1)))
 
