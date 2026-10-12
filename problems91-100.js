@@ -2,372 +2,131 @@ import gf from './generalFunctions.js'
 
 const __dirname = import.meta.dirname
 
+//Problem 93 - Arithmetic Expressions
+	
+/* Starting solution - Greedy AF brute force
+	What is our limit?
 
+	** "By using each of the digits from the set" - meaning we are using digits, NOT numbers. Our "limit"
+			really is a brute force approach and exhausting every possible combination of DIGITS a < b < c < d
+				-Store highest value of 1, 2, ... , n for a any valid combination 
+
+		Start with values a = 1, b = 2, c = 3, and d = 4. We know n = 28 here as provided
+		1) increment d and use <greedy algorithm> to get all possible outcomes
+			=> <greedy Algorithm> 
+				Get all possible outcomes and store them
+				if values 1, 2, 3 ... n exist, great its valid so far
+					next check what values > n also exist, return this new max value
+				else its not, return n
+
+			=>increment d again until ?
+				//I'd want to stop incrementing d when I know 
+					1) Its impossible to represent any number less than n
+					OR
+					2) I can gurantee 1 to n can be expressed, but know that n + 1 can not be expressed
+						//Can use this fact as a short circuit and save a lot of time 
+
+
+		4 distinct integers, order matters, non-repetitive
+			4 pick 4 = 4! = 24
+		4 arithmetic operators, order matters, repetition allowed
+			4^3 = 64
+	=> 24 * 64 = 1536 unique ways to arrange 4 distinct integers exactly once with the arithmetic operations + brackets/parenthesis
+		At most n can be 1536
+
+
+	Brute Force method
+	-24 ways to represent 4 unique digits in 4 indices
+		-For each unique way to represent the 4 digit, there are 64 possible ways present the 4 artihmetic operators (with reptition)
+			- for each of the (24 * 64) ways, we
+
+	-Parentheses pattern
+		-In consideration of only the 4 arithmetic operators, parentheses only has an effect when 
+		prioritizing addition/subtraction (within the parenthesis) as a priority over multiplicaton/divison
+		-Use of parentheses pattern with all permutations of a,b,c,d in an expression will lead to duplicate work
+			Ex: ((a + b) - c) * d
+				has the same result as d * ((a + b) - c)
+			-Q:
+
+	a + b + c + d
+
+	a * (b + c) + d
+
+	(a + b) * c + d
+	((a + b) * c) + d // remove duplicate work with parenthesis + multiplication/division
+	(a + b) * c + d
+	a + (b + c) + d
+	a + ((b + c) + d)
+	a + b * (c + d)
+	a + b + c + d
+	a + b + c + d
+	a + b + c + d
+*/
 //Problem 94 - Almost Equilateral Triangles
 
+/*
+Personal Notes 
+	Workarounds for stupidly large areas?
 
-//Personal Notes 
-	//Workarounds for stupidly large areas?
-
-	//Looking at our use of Heron's formula
-		//Really we're just trying to see if the square root results in an integer
-			//if it were to be an integer value, then s * (s - a) * (s - b) * (s - c) would need to be a square number
-				//max, a = b =  333,333,333 and c = 333,333,334, s = 1,000,000,000, doing a bit of cheating, area = (s * 3(2/3s)) = 3s
-
-
-	// Looking at our area... where can we find something like... a mirror or symmetry... 
-		//can we have our area to be in the form area = x^2 where x can substitute for some form of Heron's formula
-		//Heron's formula will results in an integer value area 
-			//if the area is a square number
-			//if the area can be expressed as area = x^2, so let x = abc, then area can be expressed in some form (abc)(abc)
+	Looking at our use of Heron's formula
+		Really we're just trying to see if the square root results in an integer
+			if it were to be an integer value, then s * (s - a) * (s - b) * (s - c) would need to be a square number
+				max, a = b =  333,333,333 and c = 333,333,334, s = 1,000,000,000, doing a bit of cheating, area = (s * 3(2/3s)) = 3s
 
 
-//Okay the idea here is that we have 3 sides with lengths a,b,c and we know a = b
-//We have two cases
-	//case 1: c = a - 1
-	//case 2: c = a + 1
-//Heron's formula provides that 
-	//Area = sqrt(s * (s - a) * (s - b) * (s - c))
-		// s = (a + b + c) / 2, since values a,b,c are integers and a = b, s is an integer ONLY if c is an even
-	//considering we know a = b, => Area = sqrt(s * (s - a)^2 * (s - c))
-	//													 => Area = (s - a) * sqrt(s * (s - c))
-	//													 => Area = ((a + b + c - 2a) / 2) * sqrt((a + b  + c) / 2 * ((a + b + c - 2c) / 2))
-	//													 => Area = (b + c - a / 2) * sqrt((a + b + c) * (a + b - c) / 4)
-	//													 => Area = (b + c - a / 4) * sqrt((a + b + c) (a + b - c))
-	// since a = b 							 => Area = (c / 4) * sqrt((2a + c) * (2a - c))
-	// 													 => Area = (c / 4) * sqrt(4a^2 - c^2) // we don't want to have to take the square of 333,333,333 .... 
-	// instead, 								 => Area = sqrt((2a + c) * (2a - c) * (c / 4)^2)
-	//													 =>      = sqrt('                 ' * c^2 / 16)
-	//case: c = a - 1						 => 		 = sqrt(2a + (a - 1)) * (2a - (a - 1)) * (c / 4)^2) 
-	//     															 = sqrt((3a - 1) * (a + 1) * c^2 / 16)
-	//													 => 		 = sqrt((3a^2 + 2a - 1) * c^2 / 16)
-		//let pf(n) = the prime factorization of num n
-		//use pf(2a + c), pf(2a - c), and pf(c) where pf(c^2) is just double the power count of pf(c)
-			//substituting case 1: c = a - 1 || case 2: c = a + 1;
-			// 	case1: 
-				// => pf(2a - c) = pf(2a - (a - 1)) = pf(a + 1) = pf(c)
-			// case2:
-				// => pf(2a - c) = pf(2a - (a + 1)) = pf (a - 1) = pf(c)
-			//NEVERMIND I'M DUMB
-		//sum the powers of each prime in pf(2a + c), pf(2a - c) and pf(c^2)
-			//bare minimum needs to have at least 4 for the power of 2 to negate the '/16'
-			//an even count for powers of individual prime means the sqrt will cut the powers of each prime by half, still results in a guranteed integer (which is all we care about)
-				// what about primes with an odd count? does 2^(odd number / 2) ever result in an integer?
-						//We know 2^6 / 2 = 64 / 2 = 32, but that is an even number, what about something like prime^(odd num/ 2)?
-						//OKAY: So, lets say we have a prime number, now we square it, we get prime^2. LOGICALLY, a prime number squared should not be divisible by any other number other than the prime itself
-						//			prime^oddNum = (odd count of primes) * itself => can't be divisble by any even powers of the prime number, the powers of a prime can only be divisble by that prime value itself, any other prime value results in a fraction since division of two primes never result in a whole number
+	Looking at our area... where can we find something like... a mirror or symmetry... 
+		can we have our area to be in the form area = x^2 where x can substitute for some form of Heron's formula
+		Heron's formula will results in an integer value area 
+			if the area is a square number
+			if the area can be expressed as area = x^2, so let x = abc, then area can be expressed in some form (abc)(abc)
 
-							//MY CONJECTURE: cause i'm too lazy to prove, 2 individual primes can not be multiplied together to form a number that, represented as set of primes, contain different prime values
-								//Futhur, two composite numbers or even a prime multiplied by a composite can not result in a number, represented as a set of primes, contain different prime values (and count) from the original two values
 
+Okay the idea here is that we have 3 sides with lengths a,b,c and we know a = b
+We have two cases
+	case 1: c = a - 1
+	case 2: c = a + 1
+Heron's formula provides that 
+	Area = sqrt(s * (s - a) * (s - b) * (s - c))
+		s = (a + b + c) / 2, since values a,b,c are integers and a = b, s is an integer ONLY if c is an even
+	considering we know a = b, => Area = sqrt(s * (s - a)^2 * (s - c))
+														 => Area = (s - a) * sqrt(s * (s - c))
+														 => Area = ((a + b + c - 2a) / 2) * sqrt((a + b  + c) / 2 * ((a + b + c - 2c) / 2))
+														 => Area = (b + c - a / 2) * sqrt((a + b + c) * (a + b - c) / 4)
+														 => Area = (b + c - a / 4) * sqrt((a + b + c) (a + b - c))
+	since a = b 							 => Area = (c / 4) * sqrt((2a + c) * (2a - c))
+														 => Area = (c / 4) * sqrt(4a^2 - c^2) // we don't want to have to take the square of 333,333,333 .... 
+	instead, 								 => Area = sqrt((2a + c) * (2a - c) * (c / 4)^2)
+														 =>      = sqrt('                 ' * c^2 / 16)
+	case: c = a - 1						 => 		 = sqrt(2a + (a - 1)) * (2a - (a - 1)) * (c / 4)^2) 
+	    															 = sqrt((3a - 1) * (a + 1) * c^2 / 16)
+														 => 		 = sqrt((3a^2 + 2a - 1) * c^2 / 16)
+		let pf(n) = the prime factorization of num n
+		use pf(2a + c), pf(2a - c), and pf(c) where pf(c^2) is just double the power count of pf(c)
+			substituting case 1: c = a - 1 || case 2: c = a + 1;
+				case1: 
+				=> pf(2a - c) = pf(2a - (a - 1)) = pf(a + 1) = pf(c)
+			case2:
+				=> pf(2a - c) = pf(2a - (a + 1)) = pf (a - 1) = pf(c)
+			NEVERMIND I'M DUMB
+		sum the powers of each prime in pf(2a + c), pf(2a - c) and pf(c^2)
+			bare minimum needs to have at least 4 for the power of 2 to negate the '/16'
+			an even count for powers of individual prime means the sqrt will cut the powers of each prime by half, still results in a guranteed integer (which is all we care about)
+				what about primes with an odd count? does 2^(odd number / 2) ever result in an integer?
+						We know 2^6 / 2 = 64 / 2 = 32, but that is an even number, what about something like prime^(odd num/ 2)?
+						OKAY: So, lets say we have a prime number, now we square it, we get prime^2. LOGICALLY, a prime number squared should not be divisible by any other number other than the prime itself
+									prime^oddNum = (odd count of primes) * itself => can't be divisble by any even powers of the prime number, the powers of a prime can only be divisble by that prime value itself, any other prime value results in a fraction since division of two primes never result in a whole number
+
+							MY CONJECTURE: cause i'm too lazy to prove, 2 individual primes can not be multiplied together to form a number that, represented as set of primes, contain different prime values
+								Futhur, two composite numbers or even a prime multiplied by a composite can not result in a number, represented as a set of primes, contain different prime values (and count) from the original two values
+*/
 	
 
 //Reduce work: gf.primeFactorization multiple calls is causing a lot of repetiive work in getting prime data
 	//put prime data into the p94 function and have a prime factorization helper that pulls from that data instead, should reduce a lot of extra work
 
-//Given a perimeter limit,
-//Return the sum of areas that fit the question criteria of integral side lengths and integral area for "almost-equilateral" triangles
-function p94(limit) {
-	let res = '0'
-	//Heron's Formula for Area of a triangle
-	function getArea(a, b, c) {
-		const s = (a + b + c) / 2
-		return Math.sqrt(s * (s - a) * (s - b) * (s - c))
-	}
-
-	//v2 gets a little high, leads to precision errors, irrelevant for an integer check tho
-	function v2(a,b,c) {
-		return Math.sqrt(-(Math.pow(a, 4)) - Math.pow(b, 4) - Math.pow(c, 4) + (2 * Math.pow(a,2) * Math.pow(b, 2)) + (2 * Math.pow(a,2) * Math.pow(c,2)) + (2 * Math.pow(b, 2) * Math.pow(c, 2))) / 4
-	}
-	//Perimeter AND Area of "almost-equilateral" triangles up for consideration will not exceed 1 billion
-	//two sides are the same, the third differ by 1, +/- 1
-
-	//quick check at 1 1 2 since 1 1 0 is impossible
-	// console.log(getArea(1,1,2)) results in an area of 0... Do we include Degenerate Triangles????????????
-		//Might vary the answer here, include first, exclude later
-	res = gf.strSum(res, '4') // 1 1 2 results in a degenerate triangle, 0 is still an integer
-	console.log('adding 4 from 1 1 2 triangle, note to potentially exclude')
-	//loop at 2 2 1, 2 2 3 until either perimeter OR area exceeds one billion, in which case we've exhausted all of our options	
-
-	// Sieve of Eratosthenes
-	// Given a positive integer n, 
-	// //return a list of primes less than or equal to n
-	function getPrimes(n) {
-		const primes = []
-		console.log(Math.floor(n + 1))
-		const isPrimeBools = new Array(Math.floor(n + 1)).fill(true)
-
-		// res[0] = undefined 
-		// res[1] = undefined
-
-		let i = 2
-		while(i <= n) {
-			if (isPrimeBools[i]) {
-				//value i is prime
-				primes.push(i)
-				//mark multiples of i that is less than <= n
-				let k = 2
-				let prod = k * i
-				while (prod <= n) {
-					isPrimeBools[prod] = false
-					k++
-					prod = k * i
-				}
-			} else {
-				//previously been marked, multiples will also have been marked, can just move on
-			}
-			i++
-		}
-
-		return primes
-	}
-
+function p94() {
 	
-
-	// Considering we're looking at values up to 1 billion,
-	//the largest prime number we need to use to check for prime factorization is <= sqrt(1,000,000,000)
-		//if pf(num) results in an empty table for num > sqrt(1,000,000,000), we expect the number itself to be prime
-
-	// const {primes} = gf.getPrimeData(Math.pow(10, 9) + 1)
-	const primes = getPrimes(Math.sqrt(Math.pow(10, 9)))
-
-	function pfHelper(n, primes) {
-		// console.log(`Working on the pf of ${n}`)
-		const res = {}
-
-		if (n < 2) return res;
-
-
-		let num = n
-		let primeIndex = 0
-		let primeNum = primes[primeIndex]
-		while (num > 1) {
-			// console.log(`considering value prime number${primeNum} in our factorization`)
-			if (num % primeNum === 0) {
-				let pow = 0
-				while (num % primeNum === 0 && num >= primeNum) {
-					pow++
-					num = num / primeNum
-				}
-				res[primeNum] = pow
-			}
-			primeIndex++
-			primeNum = primes[primeIndex]
-
-			//Personal line of code catered towards the problem, we expect that once our list of primes are exhausted, we've reached a range where we trust the number we're looking at is itself, a prime value
-			if (primeNum === undefined) {
-				res[num] = 1
-				break;
-			}
-		}
-
-		return res
-	} 
-
-
-	let i = 2
-	const memoPF = {}
-	//our limit is perimeter <= 1,000,000,000, a + b + c <= Math.pow(10, 9) a = b, c = a +/- 1
-		//=> a and c are close enough that we can cheat and say a = c
-		//=> a <= limit / 3
-	while (i <= Math.floor(limit / 3)) {
-		// console.log(`Working out value a=${i}`)
-		//sum the powers of each prime in pf(2a + c), pf(2a - c) and pf(c^2)
-		//reduce 4 from power of 2, if less than 4, might want to verify
-		//if we have an even (power) count for each prime, power count summed between the 3,
-			//we expect an integer result
-		let pf1, pf2, pf3, c
-		let pf = {}
-
-		function helper(pf, subPf) {
-			for (const prime in subPf) {
-				if (pf[prime] === undefined) {
-					pf[prime] = subPf[prime]
-				} else {
-					pf[prime] += subPf[prime]
-				}
-			}
-		}
-		// a = b
-		//case 1: c = a - 1
-		c = i - 1
-		// pf1 = pfHelper(2*i + c, primes)
-		// pf2 = pfHelper(2*i - c, primes)
-		// pf3 = pfHelper(c, primes) //we know pf(c^2) is just an even count of pf(c) we can generally ignore this unless we need to 2^4 from pf(c^2) to negate the "/16"
-
-		if (memoPF[2 * i + c] !== undefined) {
-			pf1 = memoPF[2 * i + c]
-		} else {
-			pf1 = pfHelper(2*i + c, primes)
-			memoPF[2 * i + c] = pf1
-			// console.log(Object.keys(memoPF).length)
-		}
-
-		if (memoPF[2 * i - c] !== undefined) {
-			pf2 = memoPF[2 * i - c]
-		} else {
-			pf2 = pfHelper(2 * i - c, primes);
-			memoPF[2 * i - c] = pf2
-			// console.log(Object.keys(memoPF).length)
-		}
-
-		if (memoPF[c] !== undefined) {
-			pf3 = memoPF[c]
-		} else {
-			pf3 = pfHelper(c, primes)
-			memoPF[c] = pf3
-			// console.log(Object.keys(memoPF).length)
-		}
-		//moves prime values over to pf if they don't already exisit, if exist, sum
-		// console.log(`prime values of pf1=${2*i + c} are, `, pf1)
-		// helper(pf, pf1)
-		// console.log(`pf should look just like pf1, `, pf)
-		// console.log(`prime values of pf2=${2*i - c} are, `, pf2)
-		// helper(pf, pf2)
-		// console.log(`Multiplying 1 and 2, we get a pf of `, pf)
-		helper(pf, pf1)
-		helper(pf, pf2)
-		helper(pf, pf3)
-		helper(pf, pf3)
-
-		// for (const prime in pf2) {
-		// 	if (pf1[prime] === undefined) {
-		// 		pf1[prime] = 3 * pf2[prime]
-		// 	} else {
-		// 		pf1[prime] += 3 * pf2[prime]
-		// 	}
-		// }
-
-		//Check for even count
-		let isInt = true
-		for (const prime in pf) {
-			if (pf[prime] % 2 !== 0) {
-				// console.log('lower', i, `odd count for ${prime} in `, pf)
-				isInt = false
-				break;
-			}
-		}
-
-		// for (const prime in pf1) {
-		// 	if (pf1[prime] % 2 !== 0) {
-		// 		// console.log('lower', i, `odd count for ${prime} in `, pf)
-		// 		isInt = false
-		// 		break;
-		// 	}
-		// }
-
-		if (isInt) {
-			//add perimeter
-			console.log(`a = b =${i} and c = ${c} results in an integer area, adding ${i + i + c} to ${res}`)
-			res = gf.strSum(res, `${2 * i + c}`)
-		}
-		//case 2: c = a + 1
-		c = i + 1
-		pf = {}
-		// pf1 = pfHelper(2*i + c, primes)
-		// pf2 = pfHelper(2*i - c, primes)
-		// pf3 = pfHelper(c, primes)
-
-
-		if (memoPF[2 * i + c] !== undefined) {
-			pf1 = memoPF[2 * i + c]
-		} else {
-			pf1 = pfHelper(2*i + c, primes)
-			memoPF[2 * i + c] = pf1
-			// console.log(Object.keys(memoPF).length)
-		}
-
-		if (memoPF[2 * i - c] !== undefined) {
-			pf2 = memoPF[2 * i - c]
-		} else {
-			pf2 = pfHelper(2 * i - c, primes);
-			memoPF[2 * i - c] = pf2
-			// console.log(Object.keys(memoPF).length)
-		}
-
-		if (memoPF[c] !== undefined) {
-			pf3 = memoPF[c]
-		} else {
-			pf3 = pfHelper(c, primes)
-			memoPF[c] = pf3
-			// console.log(Object.keys(memoPF).length) 
-		}
-
-		console.log(Object.keys(memoPF).length) 
-		if (Object.keys(memoPF).length > Math.pow(10, 5)) {
-			return;
-		}
-		helper(pf, pf1)
-		helper(pf, pf2)
-		helper(pf, pf3)
-		helper(pf, pf3)
-
-		// pf1 = pfHelper(2 * i + c, primes)
-		// pf2 = pfHelper(c, primes)
-
-		// for (const prime in pf2) {
-		// 	if (pf1[prime] === undefined) {
-		// 		pf1[prime] = 3 * pf2[prime]
-		// 	} else {
-		// 		pf1[prime] += 3 * pf2[prime]
-		// 	}
-		// }
-		isInt = true
-		for (const prime in pf) {
-			if (pf[prime] % 2 !== 0) {
-				// console.log('upper',i, `odd count for ${prime} in `, pf)
-				isInt = false
-				break;
-			}
-		}
-
-		// for (const prime in pf1) {
-		// 	if (pf1[prime] % 2 !== 0) {
-		// 		// console.log('lower', i, `odd count for ${prime} in `, pf)
-		// 		isInt = false
-		// 		break;
-		// 	}
-		// }
-
-		if (isInt) {
-			console.log(`a = b =${i} and c = ${c} results in an integer area, adding ${i + i + c} to ${res}`)
-			res = gf.strSum(res, `${2 * i + c}`)
-		}
-		i++
-	}
-
-	return res
 }
-//1034530 1034529
-// const a1 = 1034530
-// const c1 = 1034529
-// const s1 = (2 * a1 + c1) / 2
-// const area1 = (s1 - a1) * Math.sqrt(s1 * (s1 - c1))
-// // console.log('1', s1 * (s1 - c1), s1 - a1, Math.sqrt(s1 * (s1 - c1)), (s1 - a1) * Math.sqrt(s1 * (s1 - c1)))
-// console.log("1", (Math.sqrt((a1 + a1 + c1) * (a1 + a1 - c1))) * (a1 + c1 - a1) / 4)
-// // console.log(area1 < Math.pow(10,12))
-// // console.log(s1, area1)
-// //1052562 1052561
-// const a2 = 1052562
-// const c2 = 1052561
-// const s2 = (2 * a2 + c2) / 2
-// const area2 = (s2 - a2) * Math.sqrt(s2 * (s2 - c2))
-// //1062162 1062163
-// const a3 = 1062162
-// const c3 = 1062163
-// const s3 = (2 * a3 + c3) / 2
-// const area3 = (s3 - a3) * Math.sqrt(s3 * (s3 - c3))
-
-// our cap for calculating is Math.pow(10, 15), any area greater or equal to 10^15 is unreliable
-// console.log(`${Number.MAX_SAFE_INTEGER}`.length)
-// console.log(`${Math.pow(10,15) * Math.pow(10, 5)}`.length)
-// console.log(Number.MAX_SAFE_INTEGER - .5, Number.isInteger(Number.MAX_SAFE_INTEGER - .5))
-// console.log(Math.floor(Number.MAX_SAFE_INTEGER  / 10), Number.isInteger(Math.floor(Number.MAX_SAFE_INTEGER  / 10) - .5))
-// console.log(Number.isInteger(Number.MAX_SAFE_INTEGER * Math.pow(10, 10) + .5))
-// console.log(p94())
-
-// console.log(p94(Math.pow(10, 9)))
-// p94(Math.pow(10, 9))
 
 
 //Problem 95 - Amicable Chains
@@ -384,8 +143,8 @@ function p95(limit) {
 	let num = 1
 	//no element exceeding one million, 1,000,000 should be included
 	while(num <= limit) {
-		let chainNumsSet = new Set()
 		const startVal = num
+		let chainNumsSet = new Set()
 		chainNumsSet.add(num)
 		let sumPDivisors = gf.getProperDivisors(num).reduce((sum, curr) => sum + curr, 0);
 
@@ -398,7 +157,7 @@ function p95(limit) {
 				sumPDivisors = seenNums[sumPDivisors]
 			}
 		}
-		//we've exit the loop, which means a chain has been formed
+		//we've exit the loop, which means a chain has been formed or a value within the chain has exceeded our limit
 		//Check to see if the chain (cycle) loops to the start or somewhere in the middle
 		if (sumPDivisors === startVal) {
 			if (chainNumsSet.size > longestChainLength) {
@@ -804,6 +563,18 @@ function p99() {
 //Problem 100 - Arranged Probability 
 
 
+//Been a while, coming back. Prety sure the general idea is, z = B + R, and looking at B * B - 1 / (z * z - 1), get prime factorization of numerator and denominator side, cancel out primes so numerator is left with no primes, and denominator is left with 2 by itself indicating a 1 to 2 ratio
+	//Ah, we want to start with z > Math.pow(10, 12), figuring out what our B and R looks like
+		//pick a number Z, go for a B + R ratio that gets as close to 50/50 as possible, increment blue (decrementing red) or vice versa to adjust ratio, if crosses .5, options exhausted 
+			//Case 1: (b * b - 1) / (z * z -1) results in .5 - its what we're looking for. Great! Return
+			//Case 2: ' 											' results in prime set we're not looking for, ratio >.5, decrement b increment r
+			//Case 3: '												' results in prime set we're not looking for, ratio <.5, increemntb, decrement r
+				//case 2,3: once increment/decrement process crosses .5, increment z and try again
+
+		//Choosing our value for Z, early on, 2/3 (66.67%) * 3/4 (75%) = 1/2 
+			//																	15/21 (71.42857 %) * 14/20 (70%) = 1/2
+			// I imagine we want to work close to 70% B to Z, maybe see if it should be higher as Z gets higher
+
 // Lets say we're working a value z, that is the sum of x = blue discs and y = red discs. z = x + y
 // if we were to represent z and z - 1 as a product of primes
 	//is there a value x such that x and x - 1 as a product of primes matches z and z - 1, with one less 2 involved - meaning the ratio of x * (x - 1) with z * (z - 1) would be 1:2 => 1/2
@@ -820,26 +591,246 @@ function p99() {
 							//in other words, sqrt(x') results in some value x'' that is not an integer, floor(x'') and ceil(x'') results in a value x and x - 1 that potentially results in x'
 			//The issue: for obscenely large values z, even if we were to reduce z * z- 1 by 2 to get z', z' would still be a ridiculously high value like... ~10^23 ,
 				//let z' -
-console.time('test')
-for (let i = 0; i < Math.pow(10, 4); i++) {
-	// const num = Math.pow(10, 12) - Math.floor(Math.random() * Math.pow(10, 12))
-	const num = Math.pow(10, 12) - i
-	console.log(num)
-	console.log(gf.primeFactorization(num))
-}
-console.timeEnd('test')
-function p100(z) {
-	//assume a value z,
-	const pf1 = gf.primeFactorization(z)
-	const pf2 = gf.primeFactorization(z - 1)
-	console.log(pf1, pf2) 
-	//break z and z - 1 into prime factorization form, product of primes, call it z'
-	//reduce z' by 2, call it x'
+// console.time('test')
+// for (let i = 0; i < Math.pow(10, 4); i++) {
+// 	// const num = Math.pow(10, 12) - Math.floor(Math.random() * Math.pow(10, 12))
+// 	const num = Math.pow(10, 12) - i
+// 	console.log(num)
+// 	console.log(gf.primeFactorization(num))
+// }
+// console.timeEnd('test')
 
-	//take the sqrt of x'
-		//if x' is a perfect square, we have no viable options
-		//else, check floor and ceil of sqrt value, take product and check if results in x'
+
+
+//AHHHHHHHHHHHHHHHH
+//SOMETHNG SOMETHING SOMETHING
+//I'm pretty certain modular arithmetic can my life easier here 
+	//or something using congruence
+			//idea is 2/3 * 3/4 = .5 => (2 * x) * (3 * x) / ((3 * x) * (4 * x)), basically x cancels out, result we're looking is (or should be made into) "simplest form" fraction that we've recognized and know will result in .5
+
+
+//Another idea is that we're trying to take the pf of "large" numbers, we can perhaps reduce the complexity of this process by simplifying our numerator and denominator before we start looking at the prime values invovled 
+	//the process of simplifying invovles finding common terms and canceling out, typically common primes or common composite numbers (which end up being made of the same common primes), sooooo, searching for primes to simplify - is it really a time/process saver? or are we just moving work somewhere else... 
+		//might just want to skip the simplify process 
+
+
+//HMMMMMMMM
+	//pf(b) + pf( b - 1) ??? or pf(b * (b - 1)), b * b - 1 is a much larger number, but one time invocation, and the whole pf process is a relatively simple and straight forward process... 
+		//we'd only rather do pf(b) + pf(b - 1) in situations where the product results in a number far too large to check for prime divisors 
+		//SO, an arbitrary value b, for z > Math.pow(10, 12), b * b - 1, hell even z * z -1 will be a 13 digit * 13 digit resulting in at least 20 digits to work with, this is probably beyond (my computer's) processing and storage capabilites...
+			//pf(b) + pf(b - 1) - pf(z) - pf(z - 1) it is
+
+//Also from what I can tell, we're looking at a 7:3 ratio (more or less) of blue to red for the typical solution
+
+
+// OOOOH, forgot about this, but for a value n, n and n - 1 are co-prime
+	//might be useful? might not be 
+
+//Helping me choose a number... What if we use binary search to reduce our process from linear to log
+//instead of looking for an arbitrary number and working our way close to a .5 ratio, can we, at a fixed value z, use a formula to determine the amount of blues and red to be as close as possible to a .5 ratio
+	//ex: z = 4, 4 * 3 = 12,  12 / 2 = 6 = 3 * 2
+	//    z = 21, 21 * 20 = 420, 210 (15 * 14) => floor(sqrt(210)) * ceil(sqrt(210)) =  14 * 15 => difference of 1, IT WORKS
+	//    z = 33, 33 * 32 = 1056, 528 => floor(sqrt(528)) * ceil(sqrt(528)) = 2
+	//    z = 120, 120 * 119 = x, x / 2 (85 * 84) => 
+
+	//I can use mods to see if two numbers (1 apart) divide into half our z * z - 1
+		//issue is z * z - 1 is a crazy large number
+
+	//get pf(z) && pf(z - 1), combine their prime and power sets, increment powers for matching primes
+		//decrement power of 2 by 1. This is the intended power and prime set of our numerator if it exists
+			//1st solution (idea): form 2 numbers 1 apart with the prime/power 
+				//each number will be made of unique primes. 0 intersecting primes
+				//How? : No fucking clue....stlll no fucking clue :)
+			//2nd solution idea: take product of primes^power and check divisors if a divisor pair is 1 apart
+				//issue, stupidly large number 
+
+	//What if... we worked in the opposite direction???
+		//We pick a value b, multiply it with b - 1, double it. Again stupidly large number, Ah, but then we'd just be looking for divisor of this number that results in a pair 1 apart...
+		//FUCK
+
+//trying to figure out how to get around working with stupidly large numbers and the idea for now is to use prime numbers
+
+//we have a value z and z - 1, we break the two in sets of prime and combine them, remove a single 2,
+	//what can we do with this (if anything) to check for a valid value for b
+		//we would need to use every prime number to form two numbers with a difference of 1
+
+	//hmmmm let x be the value where 3 * x results in the first number > 10^12
+		//we can treat it 
+function p100() {
+
+	const {primes} = gf.getPrimeData(Math.floor(Math.sqrt(Math.pow(10, 12))) + 1)
+	function pfHelper(n) {
+		// console.log(`Working on the pf of ${n}`)
+		const res = {}
+
+		if (n < 2) return res;
+
+
+		let num = n
+		let primeIndex = 0
+		let primeNum = primes[primeIndex]
+		while (num > 1) {
+			// console.log(`considering value prime number${primeNum} in our factorization`)
+			if (num % primeNum === 0) {
+				let pow = 0
+				while (num % primeNum === 0 && num >= primeNum) {
+					pow++
+					num = num / primeNum
+				}
+				res[primeNum] = pow
+			}
+			primeIndex++
+			primeNum = primes[primeIndex]
+
+			//Personal line of code catered towards the problem, we expect that once our list of primes are exhausted, we've reached a range where we trust the number we're looking at is itself, a prime value
+			if (primeNum === undefined) {
+				res[num] = 1
+				break;
+			}
+		}
+
+		return res
+	} 
+
+	// let z = Math.pow(10, 12)
+	let z = 3
+	while (z < Math.pow(10, 3)) {
+		//run our 3 cases, >, <, = to .5
+		//typical solutions at 1 < z < 10000 our in the b : r, 7 : 3 ratio, we'll use that for our arbitrary starts
+		const pfz1 = pfHelper(z)
+		const pfz2 = pfHelper(z - 1)
+
+		// const pfz = {...pfz1}
+
+		// for (const [key, value] of Object.entries(pfz2)) {
+		// 	if (pfz[key] === undefined) {
+		// 		pfz[key] = value
+		// 	} else {
+		// 		pfz[key] += value
+		// 	}
+		// }
+
+		const pfz = {...pfz1, ...pfz2} //since n and n - 1 are co prime, we dont expect overlapping primes
+		// console.log('1', pfz1, pfz2)
+		// console.log('2', pfz)
+		let b = Math.floor(.7 * z)
+
+		const pfb1 = pfHelper(b)
+		const pfb2 = pfHelper(b - 1)
+		const pfb = {...pfb1, ...pfb2}
+
+		//we have pf of num and denom
+			//now we break it down 
+			//for the result we're looking for, numerator need to be empty, denominator has a remainder of 2
+				//if its not, we need to figure out if we should incrementing or decrementing b
+
+
+		for (const [prime, power] of Object.entries(pfz)) {
+			if (pfb[prime] !== undefined) {
+				const diff = Math.min(pfb[prime], pfz[prime])
+
+				pfb[prime] -= diff
+				pfz[prime] -= diff
+
+				if (pfb[prime] === 0) delete pfb[prime];
+				if (pfz[prime] === 0) delete pfz[prime];
+			}
+		}
+
+		//we've gone through all of the primes in the denominator (z side), if any prime in the numserator (b side) wasn't checked, its because its not shared with z
+		//if numerator isn't empty and denominator has a remainder of 2, we work with the simplified fraction to figure out if its > or < .5
+
+		if (Object.keys(pfb).length !== 0 && Object.keys(pfz).length !== 1) {
+			//check simplified fraction
+				//use remaining primes of numerator and denominator to form a simplified fraction
+			let numerator = 1
+			let denominator = 1
+
+			for (const [prime, power] of Object.entries(pfb)) {
+				numerator *= Math.pow(prime, power)
+			}
+
+			for (const [prime, power] of Object.entries(pfz)) {
+				denominator *= Math.pow(prime, power)
+			}
+
+			const fract = numerator / denominator
+
+			if (fract > .5) {
+				//decrement numerator side, b side
+			} else if (fract < .5) {
+				//increment numerator side, b side
+			} else {
+				console.log('HUH? Check this out pls')
+			}
+		} else if (pfz['2'] !== undefined && pfz['2'] === 1) {
+			console.log('GREAT IT WORKED')
+		}
+		z++	
+	}	
+
+
+
 }
+p100()
+
+
+//tryin figure out how I want to pick an "arbitrary" blue and red mix to choose from
+function v100() {
+	let z = 3
+	let b = Math.ceil(z / 2)
+	let r = z - b
+
+	while (z < Math.pow(10, 3)) {
+		//run our 3 cases, >, <, = to .5
+		let numerator = b * (b - 1)
+		const denominator = z * (z - 1)
+		let fract = numerator / denominator
+		console.log(numerator / denominator)
+		console.log(numerator / denominator === .5) 
+
+		if (fract === .5) {
+			console.log('great!', b, r, z)
+		} else if (fract < .5) {
+			//increment numerator until >= .5
+
+			while (fract < .5) {
+				b++
+				r-- //really no need to think about r. z stays the same (b is the only thing we ever adjust that affects our fraction
+				numerator = b * (b - 1)
+				// denominator = z * (z - 1)
+				fract = numerator / denominator
+
+				if (fract === .5) {
+					console.log('g2', b, r, z)
+					break;
+				}
+			}
+		} else if (fract > .5) {
+			//decrement numerator until <= .5
+
+			while (fract > .5) {
+				b--
+				r++ //again no need
+				numerator = b * (b - 1)
+				// denominator = z * (z - 1)
+				fract = numerator / denominator
+
+				if (fract === .5) {
+					console.log('g3', b, r, z)
+					break;
+				}
+			}
+		}
+		z++
+		b = Math.ceil(z / 2)
+		r = z - b //blah
+	}
+}
+// v100()
+
+
+// console.log(64 * 63 / (91 * 90))
 // p100(10)
 // 144 = 12^2 = (2^2 * 3)^2
 // 784 = 28*2 = (2^2 * 7)^2, fun fact: every perfect square has a even number of primes in pf form
